@@ -6,7 +6,7 @@ It doesn't handle relationships between files, actually this library is complete
 As such the library works in principle both in the browser and in NodeJS.
 This library won't help you if you want to create or update a STAC catalog (like PySTAC would).
 
-- **Package version:** 0.1.6
+- **Package version:** 0.1.7
 - **STAC versions:** >= 0.6.0 (through [stac-migrate](https://github.com/stac-utils/stac-migrate)).
 - **Documentation:** <https://stac-js.moregeo.it/>
 
