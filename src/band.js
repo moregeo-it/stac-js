@@ -113,7 +113,9 @@ class Band extends STACObject {
     let newBands = [];
     if(Array.isArray(bands)) {
       for(let i in bands) {
-        newBands[i] = new Band(bands[i], i, context);
+        const b = bands[i];
+        const newBand = b instanceof Band ? b : new Band(b, i, context);
+        newBands.push(newBand);
       }
     }
     return newBands;

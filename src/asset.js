@@ -272,8 +272,10 @@ class Asset extends STACReference {
   static fromAssets(assets, context = null) {
     let newAssets = {};
     if(isObject(assets)) {
-      for(let key in assets) {
-        newAssets[key] = new Asset(assets[key], key, context);
+      for(let i in assets) {
+        const a = assets[i];
+        const newAsset = a instanceof Asset ? a : new Asset(a, i, context);
+        newAssets[i] = newAsset;
       }
     }
     return newAssets;

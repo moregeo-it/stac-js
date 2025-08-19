@@ -18,7 +18,9 @@ class ItemCollection extends APICollection {
 
   constructor(data, absoluteUrl = null) {
     const keyMap = {
-      features: features => features.map(feature => new Item(feature))
+      features: features => features.map(
+        feature => feature instanceof Item ? feature : new Item(feature)
+      )
     };
     super(data, absoluteUrl, keyMap);
   }

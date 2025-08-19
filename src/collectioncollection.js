@@ -17,7 +17,9 @@ class CollectionCollection extends APICollection {
 
   constructor(data, absoluteUrl = null) {
     const keyMap = {
-      collections: collections => collections.map(collection => new Collection(collection))
+      collections: collections => collections.map(
+        collection => collection instanceof Collection ? collection : new Collection(collection)
+      )
     };
     super(data, absoluteUrl, keyMap);
   }
