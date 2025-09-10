@@ -223,24 +223,29 @@ export function unionBoundingBox(bboxes) {
     return null;
   }
 
-  let extrema = {
-    west: 180,
-    south: 90,
-    east: -180,
-    north: -90,
+  const extrema = {
+    west: null,
+    south: null,
+    east: null,
+    north: null,
   };
-  bboxes.forEach(bbox => {
+  const min = ['west', 'south'];
+  for(let bbox of bboxes) {
     bbox = ensureBoundingBox(bbox);
     if (!bbox) {
-      return;
+      continue;
     }
-    let obj = toObject(bbox);
-    let min = ['west', 'south'];
-    for(let key in obj) {
-      let fn = min.includes(key) ? Math.min : Math.max;
-      extrema[key] = fn(extrema[key], obj[key]);
+    const obj = toObject(bbox);
+    for(const key in obj) {
+      if (extrema[key] === null) {
+        extrema[key] = obj[key];
+      }
+      else {
+        const fn = min.includes(key) ? Math.min : Math.max;
+        extrema[key] = fn(extrema[key], obj[key]);
+      }
     }
-  });
+  }
 
   let bbox = [extrema.west, extrema.south, extrema.east, extrema.north];
   return ensureBoundingBox(bbox);

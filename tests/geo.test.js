@@ -32,6 +32,7 @@ test('unionBoundingBox', () => {
   let bbox1 = [172.91,1.34,0,172.95,1.36,10];
   let bbox2 = [-180,-85,180,85];
   expect(unionBoundingBox([bbox1, bbox2, null])).toEqual(bbox2);
+  expect(unionBoundingBox([null, null, null])).toBeNull();
 });
 
 describe('ensureBoundingBox', () => {
