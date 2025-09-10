@@ -1,6 +1,6 @@
 {
   "name": "stac-js",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "JS drop-in classes with utilities for STAC",
   "author": "Matthias Mohr",
   "license": "Apache-2.0",
