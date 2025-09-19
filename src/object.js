@@ -146,9 +146,10 @@ class STACObject {
   /**
    * Gets the absolute URL of the STAC entity (if provided explicitly or available from the self link).
    * 
+   * @param {boolean} stringify If `true` (default), a string is returned, otherwise a URI object.
    * @returns {string|null} Absolute URL
    */
-  getAbsoluteUrl() {
+  getAbsoluteUrl(stringify = true) { // eslint-disable-line no-unused-vars
     return null;
   }
 

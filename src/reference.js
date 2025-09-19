@@ -2,8 +2,8 @@ import { browserProtocols, toAbsolute } from './http.js';
 import { cogMediaTypes, geotiffMediaTypes, isMediaType } from "./mediatypes.js";
 import { hasText } from './utils.js';
 import STACObject from './object.js';
-import URI from 'urijs';
 import { browserImageTypes } from './mediatypes.js';
+import URI from 'urijs';
 
 /**
  * A STAC reference as base for Assets and Links.
@@ -31,7 +31,7 @@ class STACReference extends STACObject {
   /**
    * Gets the URL of the reference as absolute URL.
    * 
-   * @param {boolean} stringify 
+   * @param {boolean} stringify If `true` (default), a string is returned, otherwise a URI object.
    * @returns {URI|string|null}
    */
   getAbsoluteUrl(stringify = true) {
@@ -39,7 +39,7 @@ class STACReference extends STACObject {
       return toAbsolute(this.href, this._context.getAbsoluteUrl(), stringify);
     }
     else if (this.href.includes('://')) {
-      return this.href;
+      return stringify ? this.href : URI(this.href);
     }
     return null;
   }
@@ -68,9 +68,12 @@ class STACReference extends STACObject {
     else if (!allowUndefined && typeof this.type === 'undefined') {
       return false;
     }
-    let uri = new URI(this.href);
-    let protocol = uri.protocol().toLowerCase();
-    let extension = uri.suffix().toLowerCase();
+    let uri = this.getAbsoluteUrl(false);
+    if (!uri) {
+      uri = URI(this.href);
+    }
+    const protocol = uri.protocol().toLowerCase();
+    const extension = uri.suffix().toLowerCase();
     if (hasText(protocol) && !browserProtocols.includes(protocol)) {
       return false;
     }
@@ -122,7 +125,10 @@ class STACReference extends STACObject {
    */
   isHTTP() {
     let uri = this.getAbsoluteUrl(false);
-    let protocol = uri.protocol().toLowerCase();
+    if (!uri) {
+      return null;
+    }
+    const protocol = uri.protocol().toLowerCase();
     return hasText(protocol) && browserProtocols.includes(protocol);
   }
 

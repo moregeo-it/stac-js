@@ -59,7 +59,7 @@ test('isPreview', () => {
 });
 
 test('canBrowserDisplayImage', () => {
-  let link = type => (new Link({href: 'example', type}));
+  let link = type => (new Link({href: 'https://example.com/example', type}));
 
   expect(link(undefined).canBrowserDisplayImage()).toBeFalsy();
   expect(link("image/jpg").canBrowserDisplayImage()).toBeFalsy();

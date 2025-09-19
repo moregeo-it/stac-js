@@ -86,16 +86,16 @@ class STAC extends STACHypermedia {
     if (thumbnails.length === 0) {
       thumbnails = this.getLinks().filter(link => link.isPreview());
     }
-    if (browserOnly) {
-      // Remove all images that can't be displayed in a browser
-      thumbnails = thumbnails.filter(img => img.canBrowserDisplayImage());
-    }
     // Some old catalogs use just a asset key
     if (thumbnails.length === 0) {
       const thumbnail = this.getAsset("thumbnail");
       if (thumbnail) {
         thumbnails.push(thumbnail);
       }
+    }
+    if (browserOnly) {
+      // Remove all images that can't be displayed in a browser
+      thumbnails = thumbnails.filter(img => img.canBrowserDisplayImage());
     }
     if (prefer && thumbnails.length > 1) {
       // Prefer one role over the other.

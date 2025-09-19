@@ -61,7 +61,7 @@ class Asset extends STACReference {
   /**
    * Gets the URL of the asset as absolute URL.
    * 
-   * @param {boolean} stringify 
+   * @param {boolean} stringify If `true` (default), a string is returned, otherwise a URI object.
    * @returns {URI|string|null}
    */
   getAbsoluteUrl(stringify = true) {

@@ -2,6 +2,8 @@ import STACObject from './object.js';
 import Link from './link.js';
 import { isStacMediaType } from './mediatypes.js';
 import { hasText, isObject } from './utils.js';
+import URI from 'urijs';
+
 
 /**
  * STAC Hypermedia class for STAC objects.
@@ -40,10 +42,11 @@ class STACHypermedia extends STACObject {
   /**
    * Gets the absolute URL of the STAC entity (if provided explicitly or available from the self link).
    * 
+   * @param {boolean} stringify If `true` (default), a string is returned, otherwise a URI object.
    * @returns {string|null} Absolute URL
    */
-  getAbsoluteUrl() {
-    return this._url;
+  getAbsoluteUrl(stringify = true) {
+    return stringify ? this._url : URI(this._url);
   }
 
   /**
