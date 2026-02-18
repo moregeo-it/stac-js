@@ -293,12 +293,23 @@ class STAC extends STACHypermedia {
   }
 
   /**
-   * 
-   * @todo
+   * @deprecated Use `is` instead.
    * @param {*} other 
    * @returns {boolean}
    */
   equals(other) {
+    return this.is(other);
+  }
+
+  /**
+   * Checks whether another object is the same STAC entity as this one.
+   * 
+   * It doesn't check for deep equality, but whether they are likely the same entity based on their type and id/URL.
+   * 
+   * @param {*} other 
+   * @returns {boolean}
+   */
+  is(other) {
     if (this === other) {
       return true;
     }
@@ -309,6 +320,9 @@ class STAC extends STACHypermedia {
       return false;
     }
     if (this.id && this.id === other.id) {
+      return true;
+    }
+    else if (this.absoluteUrl && this.absoluteUrl === other.absoluteUrl) {
       return true;
     }
     return false;
