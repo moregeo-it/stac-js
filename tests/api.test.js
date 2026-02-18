@@ -30,6 +30,7 @@ test('getSearchLink', () => {
   expect(link.href).toBe("https://example.com/search");
   expect(link.rel).toBe("search");
   expect(link.type).toBe("application/geo+json");
+  expect(link.method).toBe("POST");
 });
 
 test('getApiCollectionsLink', () => {

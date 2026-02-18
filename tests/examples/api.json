@@ -108,6 +108,13 @@
       "title": "STAC Search"
     },
     {
+      "rel": "search",
+      "href": "https://example.com/search",
+      "type": "application/geo+json",
+      "title": "STAC Search",
+      "method": "POST"
+    },
+    {
       "rel": "child",
       "href": "https://example.com/series/eo:platform",
       "type": "application/json",
