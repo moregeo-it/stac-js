@@ -34,14 +34,8 @@ export function toAbsolute(href, baseUrl, stringify = true) {
 export function normalizeUri(href, baseUrl = null, noParams = false, stringify = true) {
   // Parse URL and make absolute, if required
   let uri = URI(href);
-  if (baseUrl && uri.is("relative")) { // Don't convert GDAL VFS URIs: https://github.com/radiantearth/stac-browser/issues/116
-    // Avoid that baseUrls that have a . in the last parth part will be removed (e.g. https://example.com/api/v1.0 )
-    let baseUri = URI(baseUrl);
-    let baseUriPath = baseUri.path();
-    if (!baseUriPath.endsWith('/') && !baseUriPath.endsWith('.json')) {
-      baseUri.path(baseUriPath + '/');
-    }
-    uri = uri.absoluteTo(baseUri);
+  if (baseUrl && uri.is("relative")) {
+    uri = uri.absoluteTo(baseUrl);
   }
   // Normalize URL and remove trailing slash from path
   // to avoid handling the same resource twice

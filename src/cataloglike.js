@@ -1,6 +1,7 @@
 import STAC from './stac.js';
-import { geojsonMediaType, isMediaType } from "./mediatypes.js";
+import { geojsonMediaType, isMediaType, schemaMediaType } from "./mediatypes.js";
 import { hasText } from "./utils.js";
+import { queryables } from './relationtypes.js';
 
 /**
  * Class for common parts of Catalogs and Collections.
@@ -71,6 +72,17 @@ class CatalogLike extends STAC {
    */
   getApiCollectionsLink() {
     return this.getStacLinkWithRel('data');
+  }
+
+  /**
+   * Returns the link for queryables.
+   * 
+   * @returns {Link|null} The queryables link
+   */
+  getQueryablesLink() {
+    const links = this.getLinksWithRels(queryables)
+      .filter(link => isMediaType(link.type, schemaMediaType, true));
+    return links[0] || null;
   }
 
   /**

@@ -17,16 +17,26 @@ export const stacMediaTypes = [
 ];
 
 /**
+ * The media type for JSON Schemas (e.g. queryables).
+ */
+export const schemaMediaType = "application/schema+json";
+
+/**
  * All image media types that Web Browsers can show (GIF, JPEG, PNG, WebP).
  * 
  * @type {Array.<string>}
  */
 export const browserImageTypes = [
   'image/gif',
-  'image/jpeg',
+  'image/jpeg', // sometimes the invalid 'image/jpg' is used in the wild
   'image/apng',
   'image/png',
-  'image/webp'
+  'image/webp',
+// To be considered in the future if needed.
+// see also https://developer.mozilla.org/en-US/docs/Web/Media/Guides/Formats/Image_types
+//'image/bmp',
+//'image/svg+xml',
+//'image/avif',
 ];
 
 /**

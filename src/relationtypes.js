@@ -1,4 +1,16 @@
 /**
+ * Hierarchical relation types used by STAC.
+ */
+export const hierarchical = [
+  'child',
+  'collection',
+  'item',
+  'parent',
+  'root',
+  'self',
+];
+
+/**
  * All relation types used by STAC for pagination.
  * 
  * @type {Array.<string>}

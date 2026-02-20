@@ -19,6 +19,28 @@ export function hasText(string) {
   return (typeof string === 'string' && string.length > 0);
 }
 
+
+
+/**
+ * Computes the size of an array (number of array elements) or object (number of key-value-pairs).
+ * 
+ * Returns 0 for all other data types.
+ * 
+ * @param {*} obj 
+ * @returns {integer}
+ */
+export function size(obj) {
+  if (typeof obj === 'object' && obj !== null) {
+    if (Array.isArray(obj)) {
+      return obj.length;
+    }
+    else {
+      return Object.keys(obj).length;
+    }
+  }
+  return 0;
+}
+
 /**
  * Ensures a number is between a minimum and maximum value, but with a delta.
  * 

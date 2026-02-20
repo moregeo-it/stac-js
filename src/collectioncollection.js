@@ -3,6 +3,8 @@ import { unionDateTime } from './datetime.js';
 import { unionBoundingBox } from './geo.js';
 import { isObject } from './utils.js';
 import APICollection from './apicollection.js';
+import { isMediaType, schemaMediaType } from './mediatypes.js';
+import { queryables } from './relationtypes.js';
 
 /**
  * Represents an Collections containing Collections.
@@ -111,6 +113,17 @@ class CollectionCollection extends APICollection {
    */
   getTemporalExtents() {
     return this.collections.map(collection => collection.getTemporalExtent());
+  }
+  
+  /**
+   * Returns the link for queryables.
+   * 
+   * @returns {Link|null} The queryables link
+   */
+  getQueryablesLink() {
+    const links = this.getLinksWithRels(queryables)
+      .filter(link => isMediaType(link.type, schemaMediaType, true));
+    return links[0] || null;
   }
 
 }

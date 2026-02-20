@@ -99,7 +99,7 @@ class STACHypermedia extends STACObject {
    * 
    * @todo
    * @param {string} rel 
-   * @returns {Link} 
+   * @returns {Link|null} 
    */
   getLinkWithRel(rel) {
     return this.getLinks().find(link => link.rel === rel) || null;
