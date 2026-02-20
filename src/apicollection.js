@@ -1,4 +1,5 @@
 import STACHypermedia from './hypermedia.js';
+import { pagination } from './relationtypes.js';
 
 /**
  * A STAC API Collection (i.e. an ItemCollection or a CollectionCollection)
@@ -26,6 +27,35 @@ class APICollection extends STACHypermedia {
    */
   getAll() {
     return [];
+  }
+
+  /**
+   * Returns the pagination links for this response.
+   * 
+   * @returns {PaginationLinks} Pagination links
+   */
+  getPaginationLinks() {
+    /**
+     * Pagination links.
+     * 
+     * @typedef {Object} PaginationLinks
+     * @property {Link|null} first - Link to the first page
+     * @property {Link|null} prev - Link to the previous page
+     * @property {Link|null} next - Link to the next page
+     * @property {Link|null} last - Link to the last page
+     */
+    const pages = {
+      first: null,
+      prev: null,
+      next: null,
+      last: null
+    };
+    const pageLinks = this.getLinksWithRels(pagination);
+    for (const pageLink of pageLinks) {
+      const rel = pageLink.rel === 'previous' ? 'prev' : pageLink.rel;
+      pages[rel] = pageLink;
+    }
+    return pages;
   }
 
 }
