@@ -25,6 +25,14 @@ test('is...', () => {
   expect(cc.isBand()).toBeFalsy();
 });
 
+test('isResponse', () => {
+  expect(CollectionCollection.isResponse()).toBeFalsy();
+  expect(CollectionCollection.isResponse({})).toBeFalsy();
+  expect(CollectionCollection.isResponse({collections: []})).toBeTruthy();
+  expect(CollectionCollection.isResponse({collections: [], links: []})).toBeTruthy();
+  expect(CollectionCollection.isResponse({collections: {}, links: []})).toBeFalsy();
+});
+
 test('getObjectType', () => {
   expect(cc.getObjectType()).toBe("CollectionCollection");
 });

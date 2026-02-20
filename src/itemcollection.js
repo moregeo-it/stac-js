@@ -1,5 +1,6 @@
 import { unionDateTime } from './datetime.js';
 import { unionBoundingBox } from './geo.js';
+import { isObject } from './utils.js';
 import Item from './item.js';
 import APICollection from './apicollection.js';
 
@@ -15,6 +16,16 @@ import APICollection from './apicollection.js';
  * @param {string|null} absoluteUrl Absolute URL of the STAC Item Collection
  */
 class ItemCollection extends APICollection {
+
+  /**
+   * Returns whether the given data looks like a STAC ItemCollection response.
+   * 
+   * @param {*} data 
+   * @returns {boolean}
+   */
+  static isResponse(data) {
+    return isObject(data) && data.type === 'FeatureCollection' && Array.isArray(data.features);
+  }
 
   constructor(data, absoluteUrl = null) {
     const keyMap = {

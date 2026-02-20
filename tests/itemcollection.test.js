@@ -29,6 +29,14 @@ test('is...', () => {
   expect(ic.isBand()).toBeFalsy();
 });
 
+test('isResponse', () => {
+  expect(ItemCollection.isResponse()).toBeFalsy();
+  expect(ItemCollection.isResponse({})).toBeFalsy();
+  expect(ItemCollection.isResponse({type: "FeatureCollection", features: []})).toBeTruthy();
+  expect(ItemCollection.isResponse({type: "FeatureCollection", features: [], links: []})).toBeTruthy();
+  expect(ItemCollection.isResponse({type: "FeatureCollection", features: {}})).toBeFalsy();
+});
+
 test('getObjectType', () => {
   expect(ic.getObjectType()).toBe("ItemCollection");
 });
