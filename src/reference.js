@@ -1,9 +1,8 @@
 import { browserProtocols, toAbsolute } from './http.js';
 import { cogMediaTypes, geotiffMediaTypes, isMediaType } from "./mediatypes.js";
-import { hasText } from './utils.js';
+import { hasText, URI } from './utils.js';
 import STACObject from './object.js';
 import { browserImageTypes } from './mediatypes.js';
-import URI from 'urijs';
 
 /**
  * A STAC reference as base for Assets and Links.

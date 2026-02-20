@@ -1,3 +1,14 @@
+import urijs from 'urijs';
+
+// Allow duplicate query parameters to preserve them as they are
+urijs.duplicateQueryParameters = true;
+// Use %20 instead of + for URL encoding, see https://github.com/radiantearth/stac-browser/issues/804
+urijs.escapeQuerySpace = false;
+
+export function URI(...args) {
+  return urijs(...args);
+}
+
 /**
  * Checks whether a variable is a string and contains at least one character.
  * 

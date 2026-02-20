@@ -1,4 +1,4 @@
-import URI from 'urijs';
+import { URI } from './utils.js';
 
 /**
  * Protocols supported by browsers (http and https).

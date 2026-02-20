@@ -1,4 +1,4 @@
-import { ensureNumber, hasText, isObject, mergeArraysOfObjects } from '../src/utils';
+import { ensureNumber, hasText, isObject, mergeArraysOfObjects, URI } from '../src/utils';
 
 test('hasText', () => {
   expect(hasText(undefined)).toBeFalsy();
@@ -46,4 +46,16 @@ test('ensureNumber', () => {
   expect(ensureNumber(2.01, 1, 2, 0.01)).toBe(2);
   expect(ensureNumber(-0.99, -2, -1, 0.01)).toBe(-1);
   expect(ensureNumber(-2.01, -2, -1, 0.01)).toBe(-2);
+});
+
+test('URI', () => {
+  // Testing URL encoding: %20 vs. + (we want %20)
+  // see https://github.com/radiantearth/stac-browser/issues/804
+  const spacePlusUri = "http://stac.example/data.php?Service=Hilltop&Request=GetData&Site=Abbots%20Creek%20at%20Featherston&Measurement=Daily%20Rainfall%20%5BRainfall%5D";
+  const spacePercent20Uri = "http://stac.example/data.php?Service=Hilltop&Request=GetData&Site=Abbots%20Creek%20at%20Featherston&Measurement=Daily%20Rainfall%20%5BRainfall%5D";
+  expect(URI(spacePlusUri).toString()).toBe(spacePercent20Uri);
+  expect(URI(spacePercent20Uri).toString()).toBe(spacePercent20Uri);
+  // Testing duplicate query parameters
+  const duplicateQueryUri = "http://stac.example/data.php?a=1&a=2";
+  expect(URI(duplicateQueryUri).toString()).toBe(duplicateQueryUri);
 });

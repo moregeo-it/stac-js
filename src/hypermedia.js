@@ -1,8 +1,7 @@
 import STACObject from './object.js';
 import Link from './link.js';
 import { isStacMediaType } from './mediatypes.js';
-import { hasText, isObject } from './utils.js';
-import URI from 'urijs';
+import { hasText, isObject, URI } from './utils.js';
 
 
 /**
