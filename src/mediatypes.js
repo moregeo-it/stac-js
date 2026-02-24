@@ -50,6 +50,36 @@ export const cogMediaTypes = [
 ];
 
 /**
+ * All web-optimized GeoZARR media types.
+ * 
+ * @todo There are probably more variants, we may need to parse the media type completely.
+ * @type {Array.<string>}
+ */
+export const wozMediaTypes = [
+  // See stac-fields for details
+  'application/vnd.zarr; version=2; profile=multiscales',
+  'application/vnd.zarr; version=3; profile=multiscales',
+  'application/vnd+zarr; version=2; profile=multiscales',
+  'application/vnd+zarr; version=3; profile=multiscales',
+];
+
+/**
+ * All ZARR media types.
+ * 
+ * @type {Array.<string>}
+ */
+export const zarrMediaTypes = [
+  // See stac-fields for details
+  'application/vnd.zarr',
+  'application/vnd.zarr; version=2',
+  'application/vnd.zarr; version=3',
+  'application/vnd+zarr',
+  'application/vnd+zarr; version=2',
+  'application/vnd+zarr; version=3',
+  'application/x-zarr',
+].concat(wozMediaTypes);
+
+/**
  * All GeoTiff media types (including COG media types).
  * 
  * @type {Array.<string>}
