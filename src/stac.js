@@ -1,4 +1,4 @@
-import { geotiffMediaTypes, isMediaType } from './mediatypes.js';
+import { cogMediaTypes, geotiffMediaTypes, isMediaType, wozMediaTypes, zarrMediaTypes } from './mediatypes.js';
 import { isObject, hasText } from './utils.js';
 import STACHypermedia from './hypermedia.js';
 import { getBest } from './locales.js';
@@ -110,15 +110,16 @@ class STAC extends STACHypermedia {
   }
 
   /**
-   * Determines the default GeoTiff asset for visualization.
+   * Determines the default GeoTIFF/GeoZARR asset for visualization.
    * 
+   * @param {string} type The file type to look for, either `geotiff` or `geozarr`.
    * @param {boolean} httpOnly Return only GeoTiffs that can be accessed via HTTP(S)
-   * @param {boolean} cogOnly Return only COGs
-   * @returns {Asset} Default GeoTiff asset
-   * @see {rankGeoTIFFs}
+   * @param {boolean} optimizedOnly Return only optimized files (COG/WOZ)
+   * @returns {Asset} Default asset to visualize or `null` if no suitable asset is found.
+   * @see {rankGeoFiles}
    */
-  getDefaultGeoTIFF(httpOnly = true, cogOnly = false) {
-    let scores = this.rankGeoTIFFs(httpOnly, cogOnly);
+  getDefaultGeoFile(type, httpOnly = true, optimizedOnly = false) {
+    let scores = this.rankGeoFiles(type, httpOnly, optimizedOnly);
     return scores[0]?.asset;
   }
 
@@ -136,12 +137,12 @@ class STAC extends STACHypermedia {
    * Returns a relative addition to the score.
    * Negative values subtract from the score.
    * 
-   * @callback STAC~rankGeoTIFFs
+   * @callback STAC~rankGeoFiles
    * @param {Asset} asset The asset to calculate the score for.
    */
 
   /**
-   * Ranks the GeoTiff assets for visualization purposes.
+   * Ranks the GeoTiff/GeoZarr assets for visualization purposes.
    * 
    * The score factors can be found below:
    * - Roles/Keys (by default) - if multiple roles apply only the highest score is added:
@@ -151,17 +152,29 @@ class STAC extends STACHypermedia {
    *   - data => +1
    *   - none of the above => no change
    * - Other factors:
-   *   - media type is COG: +2 (if cogOnly = false)
+   *   - media type is COG/WOZ: +2 (if optimizedOnly = false)
    *   - has RGB bands: +1
    *   - additionalCriteria: +/- a custom value
    * 
+   * @param {string} type The file type to rank for, either `geotiff` or `geozarr`.
    * @param {boolean} httpOnly Return only GeoTiffs that can be accessed via HTTP(S)
-   * @param {boolean} cogOnly Return only COGs
+   * @param {boolean} optimizedOnly Return only optimized files (COG/WOZ)
    * @param {Object.<string, number>} roleScores Roles (and keys) considered for the scoring. They key is the role name, the value is the score. Higher is better. Defaults to the roles and scores detailed above. An empty object disables role-based scoring.
-   * @param {STAC~rankGeoTIFFs} additionalCriteria A function to customize the score by adding/subtracting.
-   * @returns {Array.<AssetScore>} GeoTiff assets sorted by score in descending order.
+   * @param {STAC~rankGeoFiles} additionalCriteria A function to customize the score by adding/subtracting.
+   * @returns {Array.<AssetScore>} GeoTiff/GeoZarr assets sorted by score in descending order.
    */
-  rankGeoTIFFs(httpOnly = true, cogOnly = false, roleScores = null, additionalCriteria = null) {
+  rankGeoFiles(type, httpOnly = true, optimizedOnly = false, roleScores = null, additionalCriteria = null) {
+    const mediaTypes = {
+      'geotiff': geotiffMediaTypes,
+      'geozarr': zarrMediaTypes,
+    };
+    const optimizedTypes = {
+      'geotiff': cogMediaTypes,
+      'geozarr': wozMediaTypes
+    };
+    if (!(type in mediaTypes)) {
+      return [];
+    }
     if (!isObject(roleScores)) {
       roleScores = {
         data: 1, 
@@ -171,9 +184,10 @@ class STAC extends STACHypermedia {
       };
     }
     let scores = [];
-    let assets = this.getAssetsByTypes(geotiffMediaTypes);
+    let assets = this.getAssetsByTypes(mediaTypes[type]);
     if (httpOnly) {
-      assets = assets.filter(asset => asset.isHTTP() && (!cogOnly || asset.isCOG()));
+      // todo: This doesn't cater for cases where e.g. S3 is the main asset and the HTTP asset is the alternate asset.
+      assets = assets.filter(asset => asset.isHTTP() && (!optimizedOnly || asset.isType(optimizedTypes[type])));
     }
     let roles = Object.entries(roleScores);
     for(let asset of assets) {
@@ -186,7 +200,7 @@ class STAC extends STACHypermedia {
           score += Math.max(...result); // Add the highest of the scores
         }
       }
-      if (!cogOnly && asset.isCOG()) {
+      if (!optimizedOnly && asset.isType(optimizedTypes[type])) {
         score += 2;
       }
       if (asset.findVisualBands()) {
