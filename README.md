@@ -54,7 +54,7 @@ if (obj instanceof STAC) {
   obj.getTemporalExtent();
   obj.getThumbnails();
   obj.getItemLinks();
-  obj.getDefaultGeoTIFF();
+  obj.getDefaultGeoFile();
   // ...
 }
 ```
