@@ -175,44 +175,44 @@ describe('links', () => {
   });
 });
 
-describe('rankGeoTIFFs', () => {
+describe('rankGeoFiles', () => {
   test('default', () => {
-    let ranks = item.rankGeoTIFFs();
+    let ranks = item.rankGeoFiles('geotiff');
     expect(ranks.length).toBe(3);
     expect(ranks.map(r => r.asset.getKey())).toEqual(["visual", "analytic", "udm"]);
     expect(ranks.map(r => r.score)).toEqual([5, 4, 0]);
   });
 
   test('not httpOnly', () => {
-    let ranks = item.rankGeoTIFFs(false);
+    let ranks = item.rankGeoFiles('geotiff', false);
     expect(ranks.length).toBe(4);
     expect(ranks.map(r => r.asset.getKey())).toEqual(["visual", "analytic", "s3", "udm"]);
     expect(ranks.map(r => r.score)).toEqual([5, 4, 3, 0]);
   });
 
-  test('cogOnly', () => {
-    let ranks = item.rankGeoTIFFs(true, true);
+  test('optimizedOnly', () => {
+    let ranks = item.rankGeoFiles('geotiff', true, true);
     expect(ranks.length).toBe(2);
     expect(ranks.map(r => r.asset.getKey())).toEqual(["visual", "analytic"]);
     expect(ranks.map(r => r.score)).toEqual([3, 2]);
   });
   
   test('with different roles', () => {
-    let ranks = item.rankGeoTIFFs(true, false, {analytic: 5});
+    let ranks = item.rankGeoFiles('geotiff', true, false, {analytic: 5});
     expect(ranks.length).toBe(3);
     expect(ranks.map(r => r.asset.getKey())).toEqual(["analytic", "visual", "udm"]);
     expect(ranks.map(r => r.score)).toEqual([8, 3, 0]);
   });
   
   test('with callback', () => {
-    let ranks = item.rankGeoTIFFs(true, false, null, asset => Array.isArray(asset.bands) ? 5 : -5);
+    let ranks = item.rankGeoFiles('geotiff', true, false, null, asset => Array.isArray(asset.bands) ? 5 : -5);
     expect(ranks.length).toBe(3);
     expect(ranks.map(r => r.asset.getKey())).toEqual(["visual", "analytic", "udm"]);
     expect(ranks.map(r => r.score)).toEqual([10, 9, -5]);
   });
 
-  test('getDefaultGeoTIFF', () => {
-    let asset = item.getDefaultGeoTIFF();
+  test('getDefaultGeoFile', () => {
+    let asset = item.getDefaultGeoFile('geotiff');
     expect(asset).not.toBeNull();
     expect(asset.getKey()).toEqual("visual");
     expect(asset.href).toEqual("./20201211_223832_CS2.tif");
