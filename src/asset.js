@@ -204,7 +204,6 @@ class Asset extends STACReference {
    * @returns {boolean} `true` if this asset is an Item Asset definition, `false` otherwise.
    */
   isDefinition() {
-    //
     return !hasText(this.href);
   }
 

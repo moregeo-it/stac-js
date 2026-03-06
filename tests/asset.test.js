@@ -52,6 +52,9 @@ test('is...', () => {
   expect(asset.isLink()).toBeFalsy();
   expect(asset.isAsset()).toBeTruthy();
   expect(asset.isBand()).toBeFalsy();
+  expect(asset.isSTAC()).toBeFalsy();
+  expect(asset.isApiCollection()).toBeFalsy();
+  expect(asset.isReference()).toBeTruthy();
   expect(def.isAsset()).toBeTruthy();
 });
 

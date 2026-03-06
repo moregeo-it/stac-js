@@ -44,6 +44,9 @@ test('is...', () => {
   expect(band.isLink()).toBeFalsy();
   expect(band.isAsset()).toBeFalsy();
   expect(band.isBand()).toBeTruthy();
+  expect(band.isSTAC()).toBeFalsy();
+  expect(band.isApiCollection()).toBeFalsy();
+  expect(band.isReference()).toBeFalsy();
 });
 
 test('toJSON', () => {

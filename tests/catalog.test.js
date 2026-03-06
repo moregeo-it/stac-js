@@ -22,6 +22,9 @@ test('is...', () => {
   expect(c.isAsset()).toBeFalsy();
   expect(c.isLink()).toBeFalsy();
   expect(c.isBand()).toBeFalsy();
+  expect(c.isSTAC()).toBeTruthy();
+  expect(c.isApiCollection()).toBeFalsy();
+  expect(c.isReference()).toBeFalsy();
 });
 
 test('getObjectType', () => {

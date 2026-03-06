@@ -20,6 +20,16 @@ class STAC extends STACHypermedia {
   }
 
   /**
+   * Check whether this given object is a STAC entity
+   * (i.e. an Item, a Catalog or a Collection).
+   * 
+   * @returns {boolean} `true` if the object is a STAC entity, `false` otherwise.
+    */
+  isSTAC() {
+    return true;
+  }
+
+  /**
    * Returns a single temporal extent for the STAC entity.
    *
    * @returns {Array.<Date|null>|null}

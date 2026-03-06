@@ -16,7 +16,7 @@ Automatically instantiate the right class through the factory:
 
 ```js
 import create from 'stac-js';
-// const create = import('stac-js'); // Import for NodeJS
+// const create = require('stac-js'); // Import for NodeJS
 
 const stac = {
   stac_version: '1.1.0',
@@ -31,7 +31,7 @@ Directly instantiate `Asset`, `Catalog`, `Collection`, `CollectionCollection`, `
 
 ```js
 import { Collection } from 'stac-js'; // or Catalog or Item
-// const { Collection } = import('stac-js'); // Import for NodeJS
+// const { Collection } = require('stac-js'); // Import for NodeJS
 
 const stac = {
   stac_version: '1.1.0',
@@ -46,9 +46,9 @@ You can then use the object, check whether it's STAC and call some methods, for 
 
 ```js
 import { STAC } from 'stac-js';
-// const { STAC } = import('stac-js'); // Import for NodeJS
+// const { STAC } = require('stac-js'); // Import for NodeJS
 
-if (obj instanceof STAC) {
+if (obj?.isSTAC()) {
   obj.isCollection();
   obj.getBoundingBox();
   obj.getTemporalExtent();
@@ -58,6 +58,11 @@ if (obj instanceof STAC) {
   // ...
 }
 ```
+
+> [!CAUTION]
+> Using `instanceof` can break when multiple versions of stac-js end up in the same bundle (e.g. via transitive dependencies).
+> Each version has its own class identity, so `instanceof` checks across versions will return `false`.
+> Consider using the `is...()` helper methods such as `isSTAC()` and `isItem()` instead.
 
 The classes are drop-in replacements, which means you can still access the objects as before:
 
@@ -69,12 +74,28 @@ To better visualize the available classes (blue), interfaces (yellow) and the in
 
 ![Class diagram for stac-js](classes.png)
 
-**Note:** This library is purely written based on ES6 classes and doesn't do any transpiling etc.
-If you use this library, your environment either needs to support ES6 classes or you need to take measures yourself to transpile back to whatever is supported by your environment (e.g. through Babel for the browser).
+> [!NOTE]
+> This library is purely written based on ES6 classes and doesn't do any transpiling etc.
+> If you use this library, your environment either needs to support ES6 classes or you need to take measures yourself to transpile back to whatever is supported by your environment (e.g. through Babel for the browser).
 
 ## Development
 
-- Run the tests: `npm test`
-- Run the linter: `npm run lint`
-- Format the code: `npm run format`
-- Generate documentation: `npm run docs`
+```bash
+# Run tests
+npm test
+
+# Lint source code
+npm run lint
+
+# Format the source code
+npm run format
+
+# Lint JSDoc comments
+npm run docs:lint
+
+# Generate API documentation
+npm run docs
+
+# Run all checks (docs:lint + lint + test)
+npm run check
+```

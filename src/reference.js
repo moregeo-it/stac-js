@@ -97,6 +97,19 @@ class STACReference extends STACObject {
   }
 
   /**
+   * Check whether this given object is a STAC reference
+   * (i.e. an Asset or a Link).
+   * 
+   * This is based on the class hierarchy, not on the presence of certain properties such as `href`.
+   * This means an Item Asset Definition that is an Asset, is also a reference and returns `true`.
+   * 
+   * @returns {boolean} `true` if the object is a STAC reference, `false` otherwise.
+   */
+  isReference() {
+    return true;
+  }
+
+  /**
    * Checks whether this entity is a GeoTiff (including COGs).
    *
    * @returns {boolean} `true` is this entity is a GeoTiff, `false` otherwise.
