@@ -25,15 +25,16 @@
     "src/"
   ],
   "scripts": {
-    "docs": "npx documentation build src/** -f html --github -o docs --sort-order kind",
-    "docs_lint": "npx documentation lint src/**",
+    "docs": "npx documentation build src/** -f html --github -o docs --sort-order kind && npx cpy-cli classes.png docs/classes.png",
+    "docs:lint": "npx documentation lint src/**",
     "lint": "eslint \"./src/**/*.js\" -c eslint.config.mjs",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "check": "npm run docs_lint && npm run lint && npm test"
+    "check": "npm run docs:lint && npm run lint && npm test"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
+    "cpy-cli": "^7.0.0",
     "eslint": "^9.18.0",
     "eslint-plugin-jsdoc": "^50.0.0",
     "globals": "^15.14.0",

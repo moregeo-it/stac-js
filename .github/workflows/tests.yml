@@ -10,5 +10,5 @@ jobs:
       - uses: actions/checkout@v4
       - run: npm install
       - run: npm run lint
-      - run: npm run docs_lint
+      - run: npm run docs:lint
       - run: npm test

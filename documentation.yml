@@ -1,0 +1,22 @@
+toc:
+  - name: Introduction
+    description: |
+      Simple drop-in JavaScript classes with utilities for working with data from STAC objects
+      in a read-only manner.
+
+      ## Class Diagram
+
+      ![Class diagram for stac-js](classes.png)
+  - Asset
+  - Catalog
+  - CatalogLike
+  - Collection
+  - CollectionCollection
+  - Item
+  - ItemCollection
+  - Link
+  - STAC
+  - STACHypermedia
+  - STACObject
+  - STACReference
+  - create
