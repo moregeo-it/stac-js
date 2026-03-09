@@ -6,7 +6,7 @@ import { isObject } from '../src/utils';
 
 let json = JSON.parse(fs.readFileSync('./tests/examples/item.json'));
 let item = new Item(json);
-let asset = new Asset(item.assets.analytic, "analytic", item);
+let asset = new Asset(item.assets.analytic, 'analytic', item);
 let band = asset.bands[0];
 
 describe('constructor', () => {
@@ -59,30 +59,33 @@ test('getContext', () => {
 });
 
 test('getObjectType', () => {
-  expect(band.getObjectType()).toBe("Band");
+  expect(band.getObjectType()).toBe('Band');
 });
 
 test('getMetadata', () => {
   // undefined
-  expect(band.getMetadata("foo")).not.toBeDefined();
+  expect(band.getMetadata('foo')).not.toBeDefined();
   // Get from band
-  expect(band.getMetadata("name")).toBe("band1");
+  expect(band.getMetadata('name')).toBe('band1');
   // Get from asset
-  expect(band.getMetadata("title")).toBe("4-Band Analytic");
+  expect(band.getMetadata('title')).toBe('4-Band Analytic');
   // Get from item properties
-  expect(band.getMetadata("sci:doi")).toBe("10.5061/dryad.s2v81.2/27.2");
+  expect(band.getMetadata('sci:doi')).toBe('10.5061/dryad.s2v81.2/27.2');
 });
 
 describe('getMinMaxValues', () => {
   test('bands -> statistics', () => {
-    let band = new Band({
-      "statistics": {
-        "minimum": -5,
-        "maximum": 5,
-        "mean": 0
+    let band = new Band(
+      {
+        statistics: {
+          minimum: -5,
+          maximum: 5,
+          mean: 0,
+        },
+        data_type: 'uint8',
       },
-      "data_type": "uint8"
-    }, "test");
+      'test',
+    );
     let obj = band.getMinMaxValues();
     expect(isObject(obj)).toBeTruthy();
     expect(obj.minimum).toBe(-5);
@@ -91,14 +94,12 @@ describe('getMinMaxValues', () => {
   });
 
   test('classification:classes', () => {
-    let band = new Band({
-      "classification:classes": [
-        {value: -1},
-        {value: 0},
-        {value: 1},
-        {value: 2}
-      ]
-    }, 0);
+    let band = new Band(
+      {
+        'classification:classes': [{ value: -1 }, { value: 0 }, { value: 1 }, { value: 2 }],
+      },
+      0,
+    );
     let obj = band.getMinMaxValues();
     expect(isObject(obj)).toBeTruthy();
     expect(obj.minimum).toBe(-1);
@@ -106,7 +107,7 @@ describe('getMinMaxValues', () => {
   });
 
   test('empty', () => {
-    let band = new Band({"name": "b1"}, 0);
+    let band = new Band({ name: 'b1' }, 0);
     let obj = band.getMinMaxValues();
     expect(isObject(obj)).toBeTruthy();
     expect(obj.minimum).toBeNull();
@@ -116,33 +117,42 @@ describe('getMinMaxValues', () => {
 
 describe('getNoDataValues', () => {
   test('bands', () => {
-    let b1 = new Band({nodata: "nan"}, 0);
+    let b1 = new Band({ nodata: 'nan' }, 0);
     expect(b1.getNoDataValues()).toEqual([NaN]);
 
-    let b2 = new Band({nodata: 0}, 0);
+    let b2 = new Band({ nodata: 0 }, 0);
     expect(b2.getNoDataValues()).toEqual([0]);
 
-    let b3 = new Band({name: "b3"}, 0);
+    let b3 = new Band({ name: 'b3' }, 0);
     expect(b3.getNoDataValues()).toEqual([]);
   });
 
   test('classification:classes', () => {
-    let band = new Band({
-      "classification:classes": [{
-        value: 0
-      },{
-        value: 1,
-        nodata: true
-      }]
-    }, 0);
+    let band = new Band(
+      {
+        'classification:classes': [
+          {
+            value: 0,
+          },
+          {
+            value: 1,
+            nodata: true,
+          },
+        ],
+      },
+      0,
+    );
 
     expect(band.getNoDataValues()).toEqual([1]);
   });
 
   test('file:nodata', () => {
-    let band = new Band({
-      "file:nodata": [-1, -3]
-    }, 0);
+    let band = new Band(
+      {
+        'file:nodata': [-1, -3],
+      },
+      0,
+    );
     expect(band.getNoDataValues()).toEqual([-1, -3]);
   });
 });

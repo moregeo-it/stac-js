@@ -3,28 +3,22 @@ import Link from './link.js';
 import { isStacMediaType } from './mediatypes.js';
 import { hasText, isObject, URI } from './utils.js';
 
-
 /**
  * STAC Hypermedia class for STAC objects.
- * 
+ *
  * Don't instantiate this class!
- * 
+ *
  * @interface
  * @property {Array.<Link>} links
- * 
+ *
  * @param {Object} data The STAC object
  * @param {string|null} absoluteUrl Absolute URL of the STAC object
  * @param {Object.<string, function>} keyMap Keys and functions that convert the values to stac-js objects.
  * @param {Array.<string>} privateKeys Keys that are private members of the stac-js objects (for cloning and export).
  */
 class STACHypermedia extends STACObject {
-
   constructor(data, absoluteUrl = null, keyMap = {}, privateKeys = []) {
-    super(
-      data,
-      Object.assign({ links: Link.fromLinks }, keyMap),
-      ['_url'].concat(privateKeys)
-    );
+    super(data, Object.assign({ links: Link.fromLinks }, keyMap), ['_url'].concat(privateKeys));
 
     // Set or detect the URL of the STAC entity
     if (!this._url) {
@@ -40,7 +34,7 @@ class STACHypermedia extends STACObject {
 
   /**
    * Gets the absolute URL of the STAC entity (if provided explicitly or available from the self link).
-   * 
+   *
    * @param {boolean} stringify If `true` (default), a string is returned, otherwise a URI object.
    * @returns {string|null} Absolute URL
    */
@@ -50,7 +44,7 @@ class STACHypermedia extends STACObject {
 
   /**
    * Sets the absolute URL of the STAC entity.
-   * 
+   *
    * @param {string} url Absolute URL
    */
   setAbsoluteUrl(url) {
@@ -58,76 +52,74 @@ class STACHypermedia extends STACObject {
   }
 
   /**
-   * 
+   *
    * @todo
-   * @param {string} rel 
-   * @param {boolean} allowUndefined 
+   * @param {string} rel
+   * @param {boolean} allowUndefined
    * @returns {Array.<Link>}
    */
   getStacLinksWithRel(rel, allowUndefined = true) {
-    return this.getLinksWithRels([rel])
-      .filter(link => isStacMediaType(link.type, allowUndefined));
+    return this.getLinksWithRels([rel]).filter((link) => isStacMediaType(link.type, allowUndefined));
   }
 
   /**
-   * 
+   *
    * @todo
-   * @param {string} rel 
-   * @param {boolean} allowUndefined 
-   * @returns {Link} 
+   * @param {string} rel
+   * @param {boolean} allowUndefined
+   * @returns {Link}
    */
   getStacLinkWithRel(rel, allowUndefined = true) {
     const links = this.getStacLinksWithRel(rel, allowUndefined);
     if (links.length > 0) {
       return links[0];
-    }
-    else {
+    } else {
       return null;
     }
   }
-  
+
   /**
-   * 
+   *
    * @todo
    * @returns {Array.<Link>}
    */
   getLinks() {
-    return Array.isArray(this.links) ? this.links.filter(link => isObject(link) && hasText(link.href)) : [];
+    return Array.isArray(this.links) ? this.links.filter((link) => isObject(link) && hasText(link.href)) : [];
   }
 
   /**
-   * 
+   *
    * @todo
-   * @param {string} rel 
-   * @returns {Link|null} 
+   * @param {string} rel
+   * @returns {Link|null}
    */
   getLinkWithRel(rel) {
-    return this.getLinks().find(link => link.rel === rel) || null;
+    return this.getLinks().find((link) => link.rel === rel) || null;
   }
 
   /**
-   * 
+   *
    * @todo
-   * @param {Array.<string>} rels 
-   * @returns {Array.<Link>} 
+   * @param {Array.<string>} rels
+   * @returns {Array.<Link>}
    */
   getLinksWithRels(rels) {
-    return this.getLinks().filter(link => rels.includes(link.rel));
+    return this.getLinks().filter((link) => rels.includes(link.rel));
   }
 
   /**
-   * 
+   *
    * @todo
-   * @param {Array.<string>} rels 
-   * @returns {Array.<Link>} 
+   * @param {Array.<string>} rels
+   * @returns {Array.<Link>}
    */
   getLinksWithOtherRels(rels) {
-    return this.getLinks().filter(link => !rels.includes(link.rel));
+    return this.getLinks().filter((link) => !rels.includes(link.rel));
   }
 
   /**
    * Returns the self link, if present.
-   * 
+   *
    * @returns {Link|null} The self link
    */
   getSelfLink() {
@@ -136,7 +128,7 @@ class STACHypermedia extends STACObject {
 
   /**
    * Returns the root link, if present.
-   * 
+   *
    * @returns {Link|null} The root link
    */
   getRootLink() {
@@ -145,13 +137,12 @@ class STACHypermedia extends STACObject {
 
   /**
    * Returns the parent link, if present.
-   * 
+   *
    * @returns {Link|null} The parent link
    */
   getParentLink() {
     return this.getStacLinkWithRel('parent');
   }
-  
 }
 
 export default STACHypermedia;

@@ -7,16 +7,16 @@ import Band from './band.js';
 
 /**
  * Metadata for an item, the item properties.
- * 
+ *
  * @typedef {Object} ItemProperties
  * @property {string} datetime Date and Time
  */
 
 /**
  * A STAC Item.
- * 
+ *
  * You can access all properties of the given STAC Item object directly, e.g. `item.id` or `item.properties.datetime`.
- * 
+ *
  * @class
  * @property {string} stac_version
  * @property {?Array.<string>} stac_extensions
@@ -28,28 +28,27 @@ import Band from './band.js';
  * @property {Array.<Link>} links
  * @property {Object.<string, Asset>} assets
  * @property {?string} collection
- * 
+ *
  * @param {Object} data The STAC Item object
  * @param {string|null} absoluteUrl Absolute URL of the STAC Item
  */
 class Item extends STAC {
-  
   constructor(data, absoluteUrl = null) {
     super(data, absoluteUrl, { assets: Asset.fromAssets });
   }
 
   /**
    * Returns the type of the STAC object, here: 'Item'.
-   * 
+   *
    * @returns {string}
    */
   getObjectType() {
-    return "Item";
+    return 'Item';
   }
 
   /**
    * Returns a GeoJSON Feature for this STAC object.
-   * 
+   *
    * @returns {Object|null} GeoJSON object or `null`
    */
   toGeoJSON() {
@@ -58,7 +57,7 @@ class Item extends STAC {
 
   /**
    * Returns a single 2D bounding box for the item.
-   * 
+   *
    * @returns {BoundingBox|null}
    */
   getBoundingBox() {
@@ -67,7 +66,7 @@ class Item extends STAC {
 
   /**
    * Returns 2D bounding boxes for the item.
-   * 
+   *
    * @returns {Array.<BoundingBox>}
    */
   getBoundingBoxes() {
@@ -77,9 +76,9 @@ class Item extends STAC {
 
   /**
    * Returns a datetime for the STAC Item.
-   * 
+   *
    * If no datetime but start or end datetime are specified, computes a datetime from them.
-   * 
+   *
    * @returns {Date|null}
    */
   getDateTime() {
@@ -89,8 +88,7 @@ class Item extends STAC {
       let end = isoToDate(this.properties.end_datetime);
       if (start && end) {
         return centerDateTime(start, end);
-      }
-      else {
+      } else {
         return start || end;
       }
     }
@@ -99,7 +97,7 @@ class Item extends STAC {
 
   /**
    * Returns a single temporal extent for the STAC Item.
-   * 
+   *
    * @returns {Array.<Date|null>|null}
    */
   getTemporalExtent() {
@@ -108,23 +106,22 @@ class Item extends STAC {
 
   /**
    * Returns the temporal extent(s) for the STAC Item.
-   * 
+   *
    * @returns {Array.<Array.<Date|null>>}
    */
   getTemporalExtents() {
     let dates = [];
     if (hasText(this.properties.start_datetime) || hasText(this.properties.end_datetime)) {
       dates = [[this.properties.start_datetime || null, this.properties.end_datetime || null]];
-    }
-    else if (hasText(this.properties.datetime)) {
+    } else if (hasText(this.properties.datetime)) {
       dates = [[this.properties.datetime, this.properties.datetime]];
     }
-    return dates.map(interval => interval.map(datetime => isoToDate(datetime)));
+    return dates.map((interval) => interval.map((datetime) => isoToDate(datetime)));
   }
 
   /**
    * Returns metadata from the Item properties for the given field name.
-   * 
+   *
    * @param {string} field Field name
    * @returns {*} The value of the field
    */
@@ -134,7 +131,7 @@ class Item extends STAC {
 
   /**
    * Returns the bands.
-   * 
+   *
    * @todo Merge bands from assets
    * @returns {Array.<Band>}
    */
@@ -142,21 +139,19 @@ class Item extends STAC {
     const bands = this.getMetadata('bands');
     if (Array.isArray(bands)) {
       return Band.fromBands(bands, this);
-    }
-    else {
+    } else {
       return [];
     }
   }
 
   /**
    * Returns the collection link, if present.
-   * 
+   *
    * @returns {Link|null} The collection link
    */
   getCollectionLink() {
     return this.getStacLinkWithRel('collection');
   }
-
 }
 
 export default Item;

@@ -3,9 +3,9 @@ import CollectionCollection from '../src/collectioncollection';
 import fs from 'fs';
 
 let collection = JSON.parse(fs.readFileSync('./tests/examples/collection.json'));
-let json = {collections: [collection], links: []};
+let json = { collections: [collection], links: [] };
 let cc = new CollectionCollection(json);
-let bbox = [172.91,1.34,172.95,1.36];
+let bbox = [172.91, 1.34, 172.95, 1.36];
 let temporal = [new Date(Date.UTC(2020, 11, 11, 22, 38, 32, 125)), new Date(Date.UTC(2020, 11, 14, 18, 2, 31, 437))];
 
 test('Basics', () => {
@@ -28,13 +28,13 @@ test('is...', () => {
 test('isResponse', () => {
   expect(CollectionCollection.isResponse()).toBeFalsy();
   expect(CollectionCollection.isResponse({})).toBeFalsy();
-  expect(CollectionCollection.isResponse({collections: []})).toBeTruthy();
-  expect(CollectionCollection.isResponse({collections: [], links: []})).toBeTruthy();
-  expect(CollectionCollection.isResponse({collections: {}, links: []})).toBeFalsy();
+  expect(CollectionCollection.isResponse({ collections: [] })).toBeTruthy();
+  expect(CollectionCollection.isResponse({ collections: [], links: [] })).toBeTruthy();
+  expect(CollectionCollection.isResponse({ collections: {}, links: [] })).toBeFalsy();
 });
 
 test('getObjectType', () => {
-  expect(cc.getObjectType()).toBe("CollectionCollection");
+  expect(cc.getObjectType()).toBe('CollectionCollection');
 });
 
 test('toJSON', () => {
@@ -44,7 +44,7 @@ test('toJSON', () => {
 test('toGeoJSON', () => {
   let geojson = cc.toGeoJSON();
   expect(geojson).not.toBeNull();
-  expect(geojson.type).toBe("FeatureCollection");
+  expect(geojson.type).toBe('FeatureCollection');
   expect(geojson.features.length).toBe(1);
 });
 
@@ -57,9 +57,9 @@ test('getBoundingBoxes', () => {
 });
 
 test('getMetadata', () => {
-  expect(cc.getMetadata("id")).toBeUndefined();
-  expect(cc.getMetadata("type")).toBeUndefined();
-  expect(cc.getMetadata("links")).toEqual([]);
+  expect(cc.getMetadata('id')).toBeUndefined();
+  expect(cc.getMetadata('type')).toBeUndefined();
+  expect(cc.getMetadata('links')).toEqual([]);
 });
 
 test('getTemporalExtent', () => {

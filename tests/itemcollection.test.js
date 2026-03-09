@@ -4,16 +4,16 @@ import fs from 'fs';
 
 let item = JSON.parse(fs.readFileSync('./tests/examples/item.json'));
 let item2 = JSON.parse(fs.readFileSync('./tests/examples/item-s2.json'));
-let json = {type: "FeatureCollection", features: [item, item2]};
+let json = { type: 'FeatureCollection', features: [item, item2] };
 let ic = new ItemCollection(json);
 let item1Date1 = new Date(Date.UTC(2020, 11, 14, 18, 1, 31));
 let item1Date2 = new Date(Date.UTC(2020, 11, 14, 18, 3, 31));
 let item2Date = new Date(Date.UTC(2023, 1, 27, 14, 47, 44));
 
 test('Basics', () => {
-  expect(ic.type).toBe("FeatureCollection");
+  expect(ic.type).toBe('FeatureCollection');
   expect(ic.features.length).toBe(2);
-  expect(ic.features.every(o => o instanceof Item)).toBeTruthy();
+  expect(ic.features.every((o) => o instanceof Item)).toBeTruthy();
   expect(ic.getAbsoluteUrl()).toBe(null);
 });
 
@@ -32,13 +32,13 @@ test('is...', () => {
 test('isResponse', () => {
   expect(ItemCollection.isResponse()).toBeFalsy();
   expect(ItemCollection.isResponse({})).toBeFalsy();
-  expect(ItemCollection.isResponse({type: "FeatureCollection", features: []})).toBeTruthy();
-  expect(ItemCollection.isResponse({type: "FeatureCollection", features: [], links: []})).toBeTruthy();
-  expect(ItemCollection.isResponse({type: "FeatureCollection", features: {}})).toBeFalsy();
+  expect(ItemCollection.isResponse({ type: 'FeatureCollection', features: [] })).toBeTruthy();
+  expect(ItemCollection.isResponse({ type: 'FeatureCollection', features: [], links: [] })).toBeTruthy();
+  expect(ItemCollection.isResponse({ type: 'FeatureCollection', features: {} })).toBeFalsy();
 });
 
 test('getObjectType', () => {
-  expect(ic.getObjectType()).toBe("ItemCollection");
+  expect(ic.getObjectType()).toBe('ItemCollection');
 });
 
 test('toJSON', () => {
@@ -50,12 +50,7 @@ test('toGeoJSON', () => {
 });
 
 test('getBoundingBox', () => {
-  expect(ic.getBoundingBox()).toEqual([
-    -68.05964408799198,
-    -18.17458941618659,
-    172.95,
-    1.36
-  ]);
+  expect(ic.getBoundingBox()).toEqual([-68.05964408799198, -18.17458941618659, 172.95, 1.36]);
 });
 
 test('getBoundingBoxes', () => {
@@ -63,8 +58,8 @@ test('getBoundingBoxes', () => {
 });
 
 test('getMetadata', () => {
-  expect(ic.getMetadata("id")).toBeUndefined();
-  expect(ic.getMetadata("type")).toBe("FeatureCollection");
+  expect(ic.getMetadata('id')).toBeUndefined();
+  expect(ic.getMetadata('type')).toBe('FeatureCollection');
 });
 
 test('getTemporalExtent', () => {
@@ -72,7 +67,10 @@ test('getTemporalExtent', () => {
 });
 
 test('getTemporalExtents', () => {
-  expect(ic.getTemporalExtents()).toEqual([[item1Date1, item1Date2], [item2Date, item2Date]]);
+  expect(ic.getTemporalExtents()).toEqual([
+    [item1Date1, item1Date2],
+    [item2Date, item2Date],
+  ]);
 });
 
 test('getAll', () => {

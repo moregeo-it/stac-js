@@ -9,19 +9,19 @@ let item = new Item(json);
 let asset = item.assets.analytic;
 let itemAsset = Object.assign({}, json.assets.analytic);
 delete itemAsset.href;
-let def = new Asset(itemAsset, "analytic", item);
+let def = new Asset(itemAsset, 'analytic', item);
 let url = 'https://example.com/20201211_223832_CS2/20201211_223832_CS2_analytic.tif';
 
 describe('constructor', () => {
   test('normal', () => {
     expect(() => new Asset()).toThrow();
-    expect(() => new Asset(null, "key", item)).toThrow();
+    expect(() => new Asset(null, 'key', item)).toThrow();
 
     expect(() => new Asset({})).not.toThrow();
     expect(() => new Asset({}, null, item)).not.toThrow();
-    expect(() => new Asset({}, "key")).not.toThrow();
-    expect(() => new Asset({}, "key", null)).not.toThrow();
-    expect(() => new Asset({}, "key", item)).not.toThrow();
+    expect(() => new Asset({}, 'key')).not.toThrow();
+    expect(() => new Asset({}, 'key', null)).not.toThrow();
+    expect(() => new Asset({}, 'key', item)).not.toThrow();
 
     expect(() => new Asset(itemAsset)).not.toThrow();
   });
@@ -29,7 +29,7 @@ describe('constructor', () => {
   test('clone', () => {
     expect(asset instanceof Asset).toBeTruthy();
     expect(() => new Asset(asset)).not.toThrow();
-  
+
     let cloned = new Asset(asset);
     expect(cloned.getContext()).toBe(asset.getContext());
     expect(cloned.getKey()).toBe(asset.getKey());
@@ -57,10 +57,10 @@ test('is...', () => {
 
 test('isPreview', () => {
   expect(asset.isPreview()).toBeFalsy();
-  expect((new Asset({href: 'example.png', roles: ['abc', 'overview']}, 'xxx')).isPreview()).toBeTruthy();
-  expect((new Asset({href: 'example.png', roles: ['thumbnail']}, 'xxx')).isPreview()).toBeTruthy();
-  expect((new Asset({href: 'example.png'}, 'overview')).isPreview()).toBeTruthy();
-  expect((new Asset({href: 'example.png'}, 'thumbnail')).isPreview()).toBeTruthy();
+  expect(new Asset({ href: 'example.png', roles: ['abc', 'overview'] }, 'xxx').isPreview()).toBeTruthy();
+  expect(new Asset({ href: 'example.png', roles: ['thumbnail'] }, 'xxx').isPreview()).toBeTruthy();
+  expect(new Asset({ href: 'example.png' }, 'overview').isPreview()).toBeTruthy();
+  expect(new Asset({ href: 'example.png' }, 'thumbnail').isPreview()).toBeTruthy();
 });
 
 test('toJSON', () => {
@@ -69,8 +69,8 @@ test('toJSON', () => {
 });
 
 test('getKey', () => {
-  expect(asset.getKey()).toBe("analytic");
-  expect(def.getKey()).toBe("analytic");
+  expect(asset.getKey()).toBe('analytic');
+  expect(def.getKey()).toBe('analytic');
 });
 
 test('getContext', () => {
@@ -79,19 +79,19 @@ test('getContext', () => {
 });
 
 test('getObjectType', () => {
-  expect(asset.getObjectType()).toBe("Asset");
-  expect(def.getObjectType()).toBe("Asset");
+  expect(asset.getObjectType()).toBe('Asset');
+  expect(def.getObjectType()).toBe('Asset');
 });
 
 test('getMetadata', () => {
   // undefined
-  expect(asset.getMetadata("foo")).not.toBeDefined();
+  expect(asset.getMetadata('foo')).not.toBeDefined();
   // Get from asset
-  expect(asset.getMetadata("roles")).toEqual(["data"]);
+  expect(asset.getMetadata('roles')).toEqual(['data']);
   // Get from item properties
-  expect(asset.getMetadata("proj:code")).toBe("EPSG:32659");
+  expect(asset.getMetadata('proj:code')).toBe('EPSG:32659');
 
-  expect(def.getMetadata("proj:code")).toBe("EPSG:32659");
+  expect(def.getMetadata('proj:code')).toBe('EPSG:32659');
 });
 
 test('alternate assets', () => {
@@ -100,17 +100,17 @@ test('alternate assets', () => {
   let asset = item2.assets.B01_60m;
   let altAsset = asset.alternate.s3;
   // Check container asset
-  expect(asset.getMetadata("alternate:name")).toBe("HTTPS");
+  expect(asset.getMetadata('alternate:name')).toBe('HTTPS');
   // Check alternate asset support
   expect(altAsset instanceof Asset).toBeTruthy();
   // Check alternate asset metadata, not retrieved from container asset
-  expect(altAsset.getMetadata("alternate:name")).toBe("S3");
+  expect(altAsset.getMetadata('alternate:name')).toBe('S3');
   // Get metadata from container asset of not set in alternate asset
-  expect(altAsset.getMetadata("nodata")).toBe(0);
+  expect(altAsset.getMetadata('nodata')).toBe(0);
 });
 
 test('getAbsoluteUrl', () => {
-  expect(asset.getAbsoluteUrl()).toBe("https://example.com/20201211_223832_CS2/20201211_223832_CS2_analytic.tif");
+  expect(asset.getAbsoluteUrl()).toBe('https://example.com/20201211_223832_CS2/20201211_223832_CS2_analytic.tif');
   expect(def.getAbsoluteUrl()).toBeNull();
 });
 
@@ -130,9 +130,9 @@ test('isDefinition', () => {
 });
 
 test('isType', () => {
-  expect(asset.isType("image/tiff")).toBeFalsy();
-  expect(asset.isType("image/tiff; application=geotiff; profile=cloud-optimized")).toBeTruthy();
-  expect(def.isType("image/tiff; application=geotiff; profile=cloud-optimized")).toBeTruthy();
+  expect(asset.isType('image/tiff')).toBeFalsy();
+  expect(asset.isType('image/tiff; application=geotiff; profile=cloud-optimized')).toBeTruthy();
+  expect(def.isType('image/tiff; application=geotiff; profile=cloud-optimized')).toBeTruthy();
 });
 
 test('isHTTP', () => {
@@ -141,81 +141,92 @@ test('isHTTP', () => {
 });
 
 test('getBands', () => {
-  expect(asset.getBands().every(band => band instanceof Band)).toBeTruthy();
-  expect(asset.getBands().map(band => band.toJSON())).toEqual(asset.bands.map(band => band.toJSON()));
+  expect(asset.getBands().every((band) => band instanceof Band)).toBeTruthy();
+  expect(asset.getBands().map((band) => band.toJSON())).toEqual(asset.bands.map((band) => band.toJSON()));
 
-  expect(def.getBands().every(band => band instanceof Band)).toBeTruthy();
-  expect(def.getBands().map(band => band.toJSON())).toEqual(asset.bands.map(band => band.toJSON()));
+  expect(def.getBands().every((band) => band instanceof Band)).toBeTruthy();
+  expect(def.getBands().map((band) => band.toJSON())).toEqual(asset.bands.map((band) => band.toJSON()));
 });
 
 test('hasRole', () => {
-  expect(def.hasRole("data")).toBeTruthy();
-  expect(asset.hasRole("data")).toBeTruthy();
-  expect(asset.hasRole(["data", "foo"])).toBeTruthy();
-  expect(def.hasRole("foo")).toBeFalsy();
-  expect(asset.hasRole("foo")).toBeFalsy();
-  expect(asset.hasRole(["bar"])).toBeFalsy();
+  expect(def.hasRole('data')).toBeTruthy();
+  expect(asset.hasRole('data')).toBeTruthy();
+  expect(asset.hasRole(['data', 'foo'])).toBeTruthy();
+  expect(def.hasRole('foo')).toBeFalsy();
+  expect(asset.hasRole('foo')).toBeFalsy();
+  expect(asset.hasRole(['bar'])).toBeFalsy();
 });
 
 test('findBand', () => {
-  let b1 = { name: "b1" };
-  let b2 = { name: "b2", "eo:common_name": "blue" };
-  let b3 = { "eo:common_name": "red" };
+  let b1 = { name: 'b1' };
+  let b2 = { name: 'b2', 'eo:common_name': 'blue' };
+  let b3 = { 'eo:common_name': 'red' };
   let bands = [b1, b2, b3];
-  let asset = new Asset({
-    "href": "ex.tif",
-    "bands": bands
-  }, "test");
+  let asset = new Asset(
+    {
+      href: 'ex.tif',
+      bands: bands,
+    },
+    'test',
+  );
   let b1i = new Band(b1, 0, asset);
   let b2i = new Band(b2, 1, asset);
   let b3i = new Band(b3, 2, asset);
 
-  expect(asset.findBand("b1")).toEqual(b1i);
-  expect(asset.findBand("b2")).toEqual(b2i);
-  expect(asset.findBand("blue", "eo:common_name")).toEqual(b2i);
-  expect(asset.findBand("red", "eo:common_name")).toEqual(b3i);
-  expect(asset.findBand(["foo", "red", "bar"], "eo:common_name")).toEqual(b3i);
+  expect(asset.findBand('b1')).toEqual(b1i);
+  expect(asset.findBand('b2')).toEqual(b2i);
+  expect(asset.findBand('blue', 'eo:common_name')).toEqual(b2i);
+  expect(asset.findBand('red', 'eo:common_name')).toEqual(b3i);
+  expect(asset.findBand(['foo', 'red', 'bar'], 'eo:common_name')).toEqual(b3i);
 
-  expect(asset.findBand("green", "eo:common_name")).toBeNull();
-  expect(asset.findBand("b1", "eo:common_name")).toBeNull();
-  expect(asset.findBand("red")).toBeNull();
-  expect(asset.findBand("b3")).toBeNull();
+  expect(asset.findBand('green', 'eo:common_name')).toBeNull();
+  expect(asset.findBand('b1', 'eo:common_name')).toBeNull();
+  expect(asset.findBand('red')).toBeNull();
+  expect(asset.findBand('b3')).toBeNull();
 });
 
 test('findVisualBands', () => {
-  let getBand = name => {
-    let index = asset.bands.findIndex(b => b['eo:common_name'] === name);
+  let getBand = (name) => {
+    let index = asset.bands.findIndex((b) => b['eo:common_name'] === name);
     let band = asset.bands[index];
     return new Band(band, index, asset);
   };
   expect(asset.findVisualBands()).toEqual({
     red: getBand('red'),
     green: getBand('green'),
-    blue: getBand('blue')
+    blue: getBand('blue'),
   });
 });
 
 describe('getMinMaxValues', () => {
   test('bands -> statistics', () => {
-    let asset = new Asset({
-      "bands": [{
-        "statistics": {
-          "minimum": -5,
-          "maximum": 5,
-          "mean": 0
-        },
-        "data_type": "uint8"
-      }]
-    }, "test");
+    let asset = new Asset(
+      {
+        bands: [
+          {
+            statistics: {
+              minimum: -5,
+              maximum: 5,
+              mean: 0,
+            },
+            data_type: 'uint8',
+          },
+        ],
+      },
+      'test',
+    );
     let obj = asset.getBand(0).getMinMaxValues();
     expect(isObject(obj)).toBeTruthy();
     expect(obj.minimum).toBe(-5);
     expect(obj.maximum).toBe(5);
     expect(obj.mean).not.toBeDefined();
 
-    let asset2 = new Asset({
-      "bands": [{}]
-    }, "test");
+    let asset2 = new Asset(
+      {
+        bands: [{}],
+      },
+      'test',
+    );
     let obj2 = asset2.getBand(0).getMinMaxValues();
     expect(isObject(obj2)).toBeTruthy();
     expect(obj2.minimum).toBeNull();
@@ -224,14 +235,12 @@ describe('getMinMaxValues', () => {
   });
 
   test('classification:classes', () => {
-    let asset = new Asset({
-      "classification:classes": [
-        {value: -1},
-        {value: 0},
-        {value: 1},
-        {value: 2}
-      ]
-    }, "test");
+    let asset = new Asset(
+      {
+        'classification:classes': [{ value: -1 }, { value: 0 }, { value: 1 }, { value: 2 }],
+      },
+      'test',
+    );
     let obj = asset.getMinMaxValues();
     expect(isObject(obj)).toBeTruthy();
     expect(obj.minimum).toBe(-1);
@@ -239,9 +248,12 @@ describe('getMinMaxValues', () => {
   });
 
   test('data_type', () => {
-    let asset = new Asset({
-      "data_type": "uint8"
-    }, "test");
+    let asset = new Asset(
+      {
+        data_type: 'uint8',
+      },
+      'test',
+    );
     let obj = asset.getMinMaxValues();
     expect(isObject(obj)).toBeTruthy();
     expect(obj.minimum).toBe(0);
@@ -249,13 +261,12 @@ describe('getMinMaxValues', () => {
   });
 
   test('classification:classes', () => {
-    let asset = new Asset({
-      "file:values": [
-        {values: [1,2]},
-        {values: [0]},
-        {values: [-1]}
-      ]
-    }, "test");
+    let asset = new Asset(
+      {
+        'file:values': [{ values: [1, 2] }, { values: [0] }, { values: [-1] }],
+      },
+      'test',
+    );
     let obj = asset.getMinMaxValues();
     expect(isObject(obj)).toBeTruthy();
     expect(obj.minimum).toBe(-1);
@@ -263,7 +274,7 @@ describe('getMinMaxValues', () => {
   });
 
   test('empty', () => {
-    let asset = new Asset({"href": "example.jpg"}, "test");
+    let asset = new Asset({ href: 'example.jpg' }, 'test');
     let obj = asset.getMinMaxValues();
     expect(isObject(obj)).toBeTruthy();
     expect(obj.minimum).toBeNull();
@@ -273,22 +284,32 @@ describe('getMinMaxValues', () => {
 
 describe('getNoDataValues', () => {
   test('asset', () => {
-    let asset = new Asset({
-      "nodata": "nan"
-    }, "test");
+    let asset = new Asset(
+      {
+        nodata: 'nan',
+      },
+      'test',
+    );
     expect(asset.getNoDataValues()).toEqual([NaN]);
   });
 
   test('bands', () => {
-    let asset = new Asset({
-      "bands": [{
-        "nodata": "nan"
-      },{
-        "nodata": 0
-      },{
-        "name": "b3"
-      }]
-    }, "test");
+    let asset = new Asset(
+      {
+        bands: [
+          {
+            nodata: 'nan',
+          },
+          {
+            nodata: 0,
+          },
+          {
+            name: 'b3',
+          },
+        ],
+      },
+      'test',
+    );
 
     expect(asset.getNoDataValues()).toEqual([]);
     expect(asset.getBand(0).getNoDataValues()).toEqual([NaN]);
@@ -297,22 +318,31 @@ describe('getNoDataValues', () => {
   });
 
   test('classification:classes', () => {
-    let asset = new Asset({
-      "classification:classes": [{
-        value: 0,
-        nodata: true
-      },{
-        value: 1
-      },]
-    }, "test");
+    let asset = new Asset(
+      {
+        'classification:classes': [
+          {
+            value: 0,
+            nodata: true,
+          },
+          {
+            value: 1,
+          },
+        ],
+      },
+      'test',
+    );
 
     expect(asset.getNoDataValues()).toEqual([0]);
   });
 
   test('file:nodata', () => {
-    let asset = new Asset({
-      "file:nodata": [-1, -3]
-    }, "test");
+    let asset = new Asset(
+      {
+        'file:nodata': [-1, -3],
+      },
+      'test',
+    );
     expect(asset.getNoDataValues()).toEqual([-1, -3]);
   });
 });

@@ -2,14 +2,14 @@ import Collection from '../src/collection';
 import fs from 'fs';
 
 let json = JSON.parse(fs.readFileSync('./tests/examples/collection.json'));
-let url = "https://example.com/api";
+let url = 'https://example.com/api';
 let c = new Collection(json, url);
-let bbox = [172.91,1.34,172.95,1.36];
+let bbox = [172.91, 1.34, 172.95, 1.36];
 let temporal = [new Date(Date.UTC(2020, 11, 11, 22, 38, 32, 125)), new Date(Date.UTC(2020, 11, 14, 18, 2, 31, 437))];
 
 test('Basics', () => {
-  expect(c.stac_version).toBe("1.1.0");
-  expect(c.getMetadata("stac_version")).toBe("1.1.0");
+  expect(c.stac_version).toBe('1.1.0');
+  expect(c.getMetadata('stac_version')).toBe('1.1.0');
   expect(c.getAbsoluteUrl()).toBe(url);
 });
 
@@ -26,7 +26,7 @@ test('is...', () => {
 });
 
 test('getObjectType', () => {
-  expect(c.getObjectType()).toBe("Collection");
+  expect(c.getObjectType()).toBe('Collection');
 });
 
 test('toJSON', () => {
@@ -37,8 +37,8 @@ test('toGeoJSON', () => {
   let geojson = c.toGeoJSON();
   expect(geojson).not.toBeNull();
   expect(geojson.id).toBe(c.id);
-  expect(geojson.type).toBe("Feature");
-  expect(geojson.geometry.type).toBe("Polygon");
+  expect(geojson.type).toBe('Feature');
+  expect(geojson.geometry.type).toBe('Polygon');
   expect(geojson.geometry.coordinates.length).toBe(1);
   expect(geojson.properties).toEqual({});
 });
@@ -60,7 +60,7 @@ test('getTemporalExtents', () => {
 });
 
 test('getAsset', () => {
-  expect(c.getAsset("test")).toBeNull();
+  expect(c.getAsset('test')).toBeNull();
 });
 
 test('getAssets', () => {
