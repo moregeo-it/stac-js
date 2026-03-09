@@ -3,23 +3,22 @@ import { isObject } from './utils.js';
 
 /**
  * Base class for STAC objects.
- * 
+ *
  * Don't instantiate this class!
- * 
+ *
  * @interface
  * @param {Object} data The STAC object
  * @param {Object.<string, function>} keyMap Keys and functions that convert the values to stac-js objects.
  * @param {Array.<string>} privateKeys Keys that are private members of the stac-js objects (for cloning and export).
  */
 class STACObject {
-
   constructor(data, keyMap = {}, privateKeys = []) {
     if (!isObject(data)) {
       throw new Error('Given data is not an object');
     }
 
     if (data instanceof STACObject) {
-      for(let key of privateKeys) {
+      for (let key of privateKeys) {
         this[key] = data[key];
       }
       data = data.toJSON();
@@ -35,8 +34,7 @@ class STACObject {
       if (typeof this[key] === 'undefined') {
         if (key in keyMap) {
           this[key] = keyMap[key](data[key], this);
-        }
-        else {
+        } else {
           this[key] = data[key];
         }
       }
@@ -45,7 +43,7 @@ class STACObject {
 
   /**
    * Check whether this given object is a STAC Item.
-   * 
+   *
    * @returns {boolean} `true` if the object is a STAC Item, `false` otherwise.
    */
   isItem() {
@@ -54,7 +52,7 @@ class STACObject {
 
   /**
    * Check whether this given object is a STAC Catalog.
-   * 
+   *
    * @returns {boolean} `true` if the object is a STAC Catalog, `false` otherwise.
    */
   isCatalog() {
@@ -63,7 +61,7 @@ class STACObject {
 
   /**
    * Check whether this given object is "catalog-like", i.e. a Catalog or Collection.
-   * 
+   *
    * @returns {boolean} `true` if the object is a "catalog-like", `false` otherwise.
    */
   isCatalogLike() {
@@ -72,7 +70,7 @@ class STACObject {
 
   /**
    * Check whether this given object is a STAC Collection.
-   * 
+   *
    * @returns {boolean} `true` if the object is a STAC Collection, `false` otherwise.
    */
   isCollection() {
@@ -81,7 +79,7 @@ class STACObject {
 
   /**
    * Check whether this given object is a STAC ItemCollection.
-   * 
+   *
    * @returns {boolean} `true` if the object is a STAC ItemCollection, `false` otherwise.
    */
   isItemCollection() {
@@ -90,7 +88,7 @@ class STACObject {
 
   /**
    * Check whether this given object is a STAC Collection of Collections (i.e. API Collections).
-   * 
+   *
    * @returns {boolean} `true` if the object is a STAC CollectionCollection, `false` otherwise.
    */
   isCollectionCollection() {
@@ -99,7 +97,7 @@ class STACObject {
 
   /**
    * Check whether this given object is a STAC Asset.
-   * 
+   *
    * @returns {boolean} `true` if the object is a STAC Asset, `false` otherwise.
    */
   isAsset() {
@@ -108,7 +106,7 @@ class STACObject {
 
   /**
    * Check whether this given object is a STAC Link.
-   * 
+   *
    * @returns {boolean} `true` if the object is a STAC Link, `false` otherwise.
    */
   isLink() {
@@ -117,7 +115,7 @@ class STACObject {
 
   /**
    * Check whether this given object is a STAC Band.
-   * 
+   *
    * @returns {boolean} `true` if the object is a STAC Band, `false` otherwise.
    */
   isBand() {
@@ -126,7 +124,7 @@ class STACObject {
 
   /**
    * Returns the type of the STAC object.
-   * 
+   *
    * One of:
    * - Asset
    * - Catalog
@@ -145,17 +143,18 @@ class STACObject {
 
   /**
    * Gets the absolute URL of the STAC entity (if provided explicitly or available from the self link).
-   * 
+   *
    * @param {boolean} stringify If `true` (default), a string is returned, otherwise a URI object.
    * @returns {string|null} Absolute URL
    */
-  getAbsoluteUrl(stringify = true) { // eslint-disable-line no-unused-vars
+  getAbsoluteUrl(stringify = true) {
+    // eslint-disable-line no-unused-vars
     return null;
   }
 
   /**
    * Returns the metadata for the STAC entity.
-   * 
+   *
    * @param {string} field Field name
    * @returns {*}
    */
@@ -165,7 +164,7 @@ class STACObject {
 
   /**
    * Returns a GeoJSON Feature or FeatureCollection for this STAC object.
-   * 
+   *
    * @returns {Object|null} GeoJSON object or `null`
    */
   toGeoJSON() {
@@ -174,7 +173,7 @@ class STACObject {
 
   /**
    * Returns a single bounding box for the STAC entity.
-   * 
+   *
    * @returns {BoundingBox|null}
    */
   getBoundingBox() {
@@ -183,7 +182,7 @@ class STACObject {
 
   /**
    * Returns the center of the STAC entity.
-   * 
+   *
    * @returns {BoundingBox|null}
    */
   getCenter() {
@@ -192,7 +191,7 @@ class STACObject {
 
   /**
    * Returns a list of bounding boxes for the STAC entity.
-   * 
+   *
    * @returns {Array.<BoundingBox>}
    */
   getBoundingBoxes() {
@@ -201,23 +200,22 @@ class STACObject {
 
   /**
    * Returns a plain object for JSON export.
-   * 
+   *
    * @returns {Object} Plain object
    */
   toJSON() {
     let obj = {};
-    Object.keys(this).forEach(key => {
+    Object.keys(this).forEach((key) => {
       if (typeof this[key] === 'function' || this._privateKeys.includes(key)) {
         return;
       }
       let v = this[key];
       if (key in this._keyMap) {
         let v2 = Array.isArray(v) ? [] : {};
-        for(let key in v) {
+        for (let key in v) {
           if (typeof v[key].toJSON === 'function') {
             v2[key] = v[key].toJSON();
-          }
-          else {
+          } else {
             v2[key] = v[key];
           }
         }
@@ -227,7 +225,6 @@ class STACObject {
     });
     return obj;
   }
-  
 }
 
 export default STACObject;

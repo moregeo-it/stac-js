@@ -11,18 +11,12 @@ export default function parse(locale) {
   const stringLocale = String(locale);
   const keywordPos = stringLocale.indexOf('@');
 
-  const keyword = keywordPos !== -1
-    ? stringLocale.substr(keywordPos + 1)
-    : undefined;
+  const keyword = keywordPos !== -1 ? stringLocale.substr(keywordPos + 1) : undefined;
 
-  const localeWithoutKeyword = keywordPos !== -1
-    ? stringLocale.substr(0, keywordPos)
-    : stringLocale;
+  const localeWithoutKeyword = keywordPos !== -1 ? stringLocale.substr(0, keywordPos) : stringLocale;
 
   // en-us => en_us
-  const parts = String(localeWithoutKeyword)
-    .replace(/-/g, '_')
-    .split('_');
+  const parts = String(localeWithoutKeyword).replace(/-/g, '_').split('_');
 
   if (!parts.length || parts.length > 4) {
     return undefined;
@@ -91,7 +85,7 @@ export function normalize(locale, delimeter = '_') {
   return result;
 }
 
-const splitAcceptLanguageRegEx = /([a-z]{1,8}(-[a-z]{1,8})?)\s*(;\s*q\s*=\s*(1|0\.[0-9]+))?/ig;
+const splitAcceptLanguageRegEx = /([a-z]{1,8}(-[a-z]{1,8})?)\s*(;\s*q\s*=\s*(1|0\.[0-9]+))?/gi;
 const acceptLanguageItemRegEx = /^([a-z]{1,8}(-[a-z]{1,8})?)/i;
 
 export function normalizeAcceptLanguage(acceptLanguage) {
@@ -101,7 +95,7 @@ export function normalizeAcceptLanguage(acceptLanguage) {
   }
 
   const items = acceptLanguage.match(splitAcceptLanguageRegEx) || [];
-  items.forEach(acceptLanguageItem => {
+  items.forEach((acceptLanguageItem) => {
     const matches = acceptLanguageItem.match(acceptLanguageItemRegEx) || [];
     const locale = normalize(matches[0]);
     if (locale) {
@@ -115,7 +109,7 @@ export function normalizeAcceptLanguage(acceptLanguage) {
 export function prepareSupported(supported) {
   const lgs = {};
 
-  supported.forEach(supportedLocale => {
+  supported.forEach((supportedLocale) => {
     const { language, country } = parse(supportedLocale);
     if (!language) {
       throw new Error(`Locale ${supportedLocale} is not parsable`);

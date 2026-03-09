@@ -5,9 +5,11 @@ let json = JSON.parse(fs.readFileSync('./tests/examples/catalog.json'));
 let c = new Catalog(json);
 
 test('Basics', () => {
-  expect(c.id).toBe("example");
-  expect(c.getMetadata("id")).toBe("example");
-  expect(c.getAbsoluteUrl()).toBe("https://raw.githubusercontent.com/radiantearth/stac-spec/v1.1.0/examples/catalog.json");
+  expect(c.id).toBe('example');
+  expect(c.getMetadata('id')).toBe('example');
+  expect(c.getAbsoluteUrl()).toBe(
+    'https://raw.githubusercontent.com/radiantearth/stac-spec/v1.1.0/examples/catalog.json',
+  );
 });
 
 test('is...', () => {
@@ -23,7 +25,7 @@ test('is...', () => {
 });
 
 test('getObjectType', () => {
-  expect(c.getObjectType()).toBe("Catalog");
+  expect(c.getObjectType()).toBe('Catalog');
 });
 
 test('toJSON', () => {
@@ -50,18 +52,22 @@ test('getChildLinks', () => {
   let childs = c.getChildLinks();
   expect(Array.isArray(childs)).toBeTruthy();
   expect(c.getChildLinks().length).toBe(3);
-  expect(childs.every(child => child && typeof child === 'object' && child.href && child.type && child.rel === 'child')).toBeTruthy();
+  expect(
+    childs.every((child) => child && typeof child === 'object' && child.href && child.type && child.rel === 'child'),
+  ).toBeTruthy();
 });
 
 test('getItemLinks', () => {
   let items = c.getItemLinks();
   expect(Array.isArray(items)).toBeTruthy();
   expect(items.length).toBe(1);
-  expect(items.every(item => item && typeof item === 'object' && item.href && item.type && item.rel === 'item')).toBeTruthy();
+  expect(
+    items.every((item) => item && typeof item === 'object' && item.href && item.type && item.rel === 'item'),
+  ).toBeTruthy();
 });
 
 test('getBoundingBox', () => {
-  expect(c.getBoundingBox()).toBeNull()
+  expect(c.getBoundingBox()).toBeNull();
 });
 
 test('getBoundingBoxes', () => {
@@ -77,7 +83,7 @@ test('getTemporalExtents', () => {
 });
 
 test('getAsset', () => {
-  expect(c.getAsset("test")).toBeNull();
+  expect(c.getAsset('test')).toBeNull();
 });
 
 test('getAssets', () => {

@@ -4,12 +4,12 @@ test('hasText', () => {
   expect(hasText(undefined)).toBeFalsy();
   expect(hasText(null)).toBeFalsy();
   expect(hasText({})).toBeFalsy();
-  expect(hasText(["a"])).toBeFalsy();
+  expect(hasText(['a'])).toBeFalsy();
   expect(hasText(123)).toBeFalsy();
-  expect(hasText("")).toBeFalsy();
-  expect(hasText(" ")).toBeTruthy();
-  expect(hasText("a")).toBeTruthy();
-  expect(hasText("123")).toBeTruthy();
+  expect(hasText('')).toBeFalsy();
+  expect(hasText(' ')).toBeTruthy();
+  expect(hasText('a')).toBeTruthy();
+  expect(hasText('123')).toBeTruthy();
 });
 
 test('isObject', () => {
@@ -26,9 +26,13 @@ test('isObject', () => {
 test('mergeArraysOfObjects', () => {
   expect(mergeArraysOfObjects()).toEqual([]);
   expect(mergeArraysOfObjects([])).toEqual([]);
-  expect(mergeArraysOfObjects({a: 1})).toEqual([]);
-  expect(mergeArraysOfObjects([{a: 1}, {b: 1}], [{a: 2}, {c: 3}])).toEqual([{a: 2}, {b:1, c: 3}]);
-  expect(mergeArraysOfObjects([{a: 1}, {b: 1}, {c: 1}], [{a: 2, d: 2}], [{a: 3}, {b: 3}])).toEqual([{a: 3, d: 2}, {b: 3}, {c: 1}]);
+  expect(mergeArraysOfObjects({ a: 1 })).toEqual([]);
+  expect(mergeArraysOfObjects([{ a: 1 }, { b: 1 }], [{ a: 2 }, { c: 3 }])).toEqual([{ a: 2 }, { b: 1, c: 3 }]);
+  expect(mergeArraysOfObjects([{ a: 1 }, { b: 1 }, { c: 1 }], [{ a: 2, d: 2 }], [{ a: 3 }, { b: 3 }])).toEqual([
+    { a: 3, d: 2 },
+    { b: 3 },
+    { c: 1 },
+  ]);
 });
 
 test('ensureNumber', () => {
@@ -36,7 +40,7 @@ test('ensureNumber', () => {
   expect(ensureNumber(null, 0, 1)).toBeNull();
   expect(ensureNumber({}, 0, 1)).toBeNull();
   expect(ensureNumber([], 0, 1)).toBeNull();
-  expect(ensureNumber("a", 0, 1)).toBeNull();
+  expect(ensureNumber('a', 0, 1)).toBeNull();
   expect(ensureNumber(true, 0, 1)).toBeNull();
   expect(ensureNumber(0, 1, 2)).toBeNull();
   expect(ensureNumber(3, 1, 2)).toBeNull();
@@ -51,11 +55,13 @@ test('ensureNumber', () => {
 test('URI', () => {
   // Testing URL encoding: %20 vs. + (we want %20)
   // see https://github.com/radiantearth/stac-browser/issues/804
-  const spacePlusUri = "http://stac.example/data.php?Service=Hilltop&Request=GetData&Site=Abbots%20Creek%20at%20Featherston&Measurement=Daily%20Rainfall%20%5BRainfall%5D";
-  const spacePercent20Uri = "http://stac.example/data.php?Service=Hilltop&Request=GetData&Site=Abbots%20Creek%20at%20Featherston&Measurement=Daily%20Rainfall%20%5BRainfall%5D";
+  const spacePlusUri =
+    'http://stac.example/data.php?Service=Hilltop&Request=GetData&Site=Abbots%20Creek%20at%20Featherston&Measurement=Daily%20Rainfall%20%5BRainfall%5D';
+  const spacePercent20Uri =
+    'http://stac.example/data.php?Service=Hilltop&Request=GetData&Site=Abbots%20Creek%20at%20Featherston&Measurement=Daily%20Rainfall%20%5BRainfall%5D';
   expect(URI(spacePlusUri).toString()).toBe(spacePercent20Uri);
   expect(URI(spacePercent20Uri).toString()).toBe(spacePercent20Uri);
   // Testing duplicate query parameters
-  const duplicateQueryUri = "http://stac.example/data.php?a=1&a=2";
+  const duplicateQueryUri = 'http://stac.example/data.php?a=1&a=2';
   expect(URI(duplicateQueryUri).toString()).toBe(duplicateQueryUri);
 });

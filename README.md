@@ -19,9 +19,9 @@ import create from 'stac-js';
 // const create = import('stac-js'); // Import for NodeJS
 
 const stac = {
-  stac_version: "1.1.0",
-  type: "Collection",
-  id: "example",
+  stac_version: '1.1.0',
+  type: 'Collection',
+  id: 'example',
   // ...
 };
 const obj = create(stac); // Migrates data to the latest version
@@ -34,9 +34,9 @@ import { Collection } from 'stac-js'; // or Catalog or Item
 // const { Collection } = import('stac-js'); // Import for NodeJS
 
 const stac = {
-  stac_version: "1.1.0",
-  type: "Collection",
-  id: "example",
+  stac_version: '1.1.0',
+  type: 'Collection',
+  id: 'example',
   // ...
 };
 const obj = new Collection(stac); // Does NOT migrate to the latest version
@@ -71,3 +71,10 @@ To better visualize the available classes (blue), interfaces (yellow) and the in
 
 **Note:** This library is purely written based on ES6 classes and doesn't do any transpiling etc.
 If you use this library, your environment either needs to support ES6 classes or you need to take measures yourself to transpile back to whatever is supported by your environment (e.g. through Babel for the browser).
+
+## Development
+
+- Run the tests: `npm test`
+- Run the linter: `npm run lint`
+- Format the code: `npm run format`
+- Generate documentation: `npm run docs`
