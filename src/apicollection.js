@@ -20,6 +20,16 @@ class APICollection extends STACHypermedia {
   }
 
   /**
+   * Check whether this given object is a STAC API Collection
+   * (i.e. an ItemCollection or a CollectionCollection).
+   *
+   * @returns {boolean} `true` if the object is a STAC API Collection, `false` otherwise.
+   */
+  isApiCollection() {
+    return true;
+  }
+
+  /**
    * Returns all STAC entities in this list.
    *
    * @returns {Array.<STAC>} All STAC entities

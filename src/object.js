@@ -96,6 +96,39 @@ class STACObject {
   }
 
   /**
+   * Check whether this given object is a STAC reference
+   * (i.e. an Asset or a Link).
+   *
+   * This is based on the class hierarchy, not on the presence of certain properties such as `href`.
+   * This means an Item Asset Definition that is an Asset, is also a reference and returns `true`.
+   *
+   * @returns {boolean} `true` if the object is a STAC reference, `false` otherwise.
+   */
+  isReference() {
+    return false;
+  }
+
+  /**
+   * Check whether this given object is a STAC API Collection
+   * (i.e. an ItemCollection or a CollectionCollection).
+   *
+   * @returns {boolean} `true` if the object is a STAC API Collection, `false` otherwise.
+   */
+  isApiCollection() {
+    return false;
+  }
+
+  /**
+   * Check whether this given object is a STAC entity
+   * (i.e. an Item, a Catalog or a Collection).
+   *
+   * @returns {boolean} `true` if the object is a STAC entity, `false` otherwise.
+   */
+  isSTAC() {
+    return false;
+  }
+
+  /**
    * Check whether this given object is a STAC Asset.
    *
    * @returns {boolean} `true` if the object is a STAC Asset, `false` otherwise.

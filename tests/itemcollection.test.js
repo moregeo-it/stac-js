@@ -27,6 +27,9 @@ test('is...', () => {
   expect(ic.isAsset()).toBeFalsy();
   expect(ic.isLink()).toBeFalsy();
   expect(ic.isBand()).toBeFalsy();
+  expect(ic.isSTAC()).toBeFalsy();
+  expect(ic.isApiCollection()).toBeTruthy();
+  expect(ic.isReference()).toBeFalsy();
 });
 
 test('isResponse', () => {
