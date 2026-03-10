@@ -1,5 +1,8 @@
 import Catalog from '../src/catalog';
+import Link from '../src/link';
 import fs from 'fs';
+
+let apiJson = JSON.parse(fs.readFileSync('./tests/examples/api.json'));
 
 let json = JSON.parse(fs.readFileSync('./tests/examples/catalog.json'));
 let c = new Catalog(json);
@@ -91,4 +94,158 @@ test('getAsset', () => {
 
 test('getAssets', () => {
   expect(c.getAssets()).toEqual([]);
+});
+
+describe('getQueryablesLink', () => {
+  test('returns queryables link with ogc rel', () => {
+    let catalog = new Catalog(apiJson);
+    let link = catalog.getQueryablesLink();
+    expect(link).toBeInstanceOf(Link);
+    expect(link.href).toBe('https://example.com/queryables');
+  });
+
+  test('returns null when no queryables link exists', () => {
+    let catalog = new Catalog({
+      id: 'test',
+      type: 'Catalog',
+      stac_version: '1.1.0',
+      description: 'test',
+      links: [{ rel: 'self', href: 'https://example.com' }],
+    });
+    expect(catalog.getQueryablesLink()).toBeNull();
+  });
+
+  test('returns queryables link with deprecated rel', () => {
+    let catalog = new Catalog({
+      id: 'test',
+      type: 'Catalog',
+      stac_version: '1.1.0',
+      description: 'test',
+      links: [{ rel: 'queryables', href: 'https://example.com/queryables', type: 'application/schema+json' }],
+    });
+    let link = catalog.getQueryablesLink();
+    expect(link).toBeInstanceOf(Link);
+    expect(link.href).toBe('https://example.com/queryables');
+  });
+
+  test('returns queryables link with ogc-rel:queryables', () => {
+    let catalog = new Catalog({
+      id: 'test',
+      type: 'Catalog',
+      stac_version: '1.1.0',
+      description: 'test',
+      links: [{ rel: 'ogc-rel:queryables', href: 'https://example.com/q', type: 'application/schema+json' }],
+    });
+    let link = catalog.getQueryablesLink();
+    expect(link).toBeInstanceOf(Link);
+    expect(link.href).toBe('https://example.com/q');
+  });
+
+  test('filters out non-schema media types', () => {
+    let catalog = new Catalog({
+      id: 'test',
+      type: 'Catalog',
+      stac_version: '1.1.0',
+      description: 'test',
+      links: [
+        {
+          rel: 'http://www.opengis.net/def/rel/ogc/1.0/queryables',
+          href: 'https://example.com/queryables',
+          type: 'text/html',
+        },
+      ],
+    });
+    expect(catalog.getQueryablesLink()).toBeNull();
+  });
+});
+
+describe('getLocaleLink', () => {
+  test('returns null when no alternate links exist', () => {
+    let catalog = new Catalog({
+      id: 'test',
+      type: 'Catalog',
+      stac_version: '1.1.0',
+      description: 'test',
+      links: [{ rel: 'self', href: 'https://example.com', type: 'application/json' }],
+    });
+    expect(catalog.getLocaleLink('de')).toBeNull();
+  });
+
+  test('returns null when alternate links have no hreflang', () => {
+    let catalog = new Catalog({
+      id: 'test',
+      type: 'Catalog',
+      stac_version: '1.1.0',
+      description: 'test',
+      links: [
+        { rel: 'self', href: 'https://example.com', type: 'application/json' },
+        { rel: 'alternate', href: 'https://example.com/other', type: 'application/json' },
+      ],
+    });
+    expect(catalog.getLocaleLink('de')).toBeNull();
+  });
+
+  test('returns matching locale link', () => {
+    let catalog = new Catalog({
+      id: 'test',
+      type: 'Catalog',
+      stac_version: '1.1.0',
+      description: 'test',
+      links: [
+        { rel: 'self', href: 'https://example.com', type: 'application/json' },
+        { rel: 'alternate', href: 'https://example.com/de', type: 'application/json', hreflang: 'de' },
+        { rel: 'alternate', href: 'https://example.com/fr', type: 'application/json', hreflang: 'fr' },
+      ],
+    });
+    let link = catalog.getLocaleLink('de');
+    expect(link).toBeInstanceOf(Link);
+    expect(link.href).toBe('https://example.com/de');
+  });
+
+  test('returns null when locale is not available', () => {
+    let catalog = new Catalog({
+      id: 'test',
+      type: 'Catalog',
+      stac_version: '1.1.0',
+      description: 'test',
+      links: [
+        { rel: 'alternate', href: 'https://example.com/de', type: 'application/json', hreflang: 'de' },
+        { rel: 'alternate', href: 'https://example.com/fr', type: 'application/json', hreflang: 'fr' },
+      ],
+    });
+    expect(catalog.getLocaleLink('es')).toBeNull();
+  });
+
+  test('uses fallback locale when requested locale not available', () => {
+    let catalog = new Catalog({
+      id: 'test',
+      type: 'Catalog',
+      stac_version: '1.1.0',
+      description: 'test',
+      links: [
+        { rel: 'alternate', href: 'https://example.com/de', type: 'application/json', hreflang: 'de' },
+        { rel: 'alternate', href: 'https://example.com/fr', type: 'application/json', hreflang: 'fr' },
+      ],
+    });
+    let link = catalog.getLocaleLink('es', 'fr');
+    expect(link).toBeInstanceOf(Link);
+    expect(link.href).toBe('https://example.com/fr');
+  });
+
+  test('uses languages property when available', () => {
+    let catalog = new Catalog({
+      id: 'test',
+      type: 'Catalog',
+      stac_version: '1.1.0',
+      description: 'test',
+      languages: [{ code: 'en' }, { code: 'de' }],
+      links: [
+        { rel: 'alternate', href: 'https://example.com/en', type: 'application/json', hreflang: 'en' },
+        { rel: 'alternate', href: 'https://example.com/de', type: 'application/json', hreflang: 'de' },
+      ],
+    });
+    let link = catalog.getLocaleLink('de');
+    expect(link).toBeInstanceOf(Link);
+    expect(link.href).toBe('https://example.com/de');
+  });
 });

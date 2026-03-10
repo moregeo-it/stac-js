@@ -1,5 +1,6 @@
 import Collection from '../src/collection';
 import CollectionCollection from '../src/collectioncollection';
+import Link from '../src/link';
 import fs from 'fs';
 
 let collection = JSON.parse(fs.readFileSync('./tests/examples/collection.json'));
@@ -75,4 +76,17 @@ test('getTemporalExtents', () => {
 
 test('getAll', () => {
   expect(cc.getAll()).toEqual([new Collection(collection)]);
+});
+
+test('getPaginationLinks', () => {
+  let cc2 = new CollectionCollection({
+    collections: [],
+    links: [
+      { rel: 'next', href: 'https://example.com/collections?page=2' },
+      { rel: 'prev', href: 'https://example.com/collections?page=0' },
+    ],
+  });
+  let pages = cc2.getPaginationLinks();
+  expect(pages.next).toBeInstanceOf(Link);
+  expect(pages.prev).toBeInstanceOf(Link);
 });

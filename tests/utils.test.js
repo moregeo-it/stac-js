@@ -1,4 +1,4 @@
-import { ensureNumber, hasText, isObject, mergeArraysOfObjects, URI } from '../src/utils';
+import { ensureNumber, hasText, isObject, mergeArraysOfObjects, size, URI } from '../src/utils';
 
 test('hasText', () => {
   expect(hasText(undefined)).toBeFalsy();
@@ -64,4 +64,23 @@ test('URI', () => {
   // Testing duplicate query parameters
   const duplicateQueryUri = 'http://stac.example/data.php?a=1&a=2';
   expect(URI(duplicateQueryUri).toString()).toBe(duplicateQueryUri);
+});
+
+test('size', () => {
+  // Arrays
+  expect(size([])).toBe(0);
+  expect(size([1, 2, 3])).toBe(3);
+  expect(size(['a'])).toBe(1);
+  // Objects
+  expect(size({})).toBe(0);
+  expect(size({ a: 1 })).toBe(1);
+  expect(size({ a: 1, b: 2, c: 3 })).toBe(3);
+  // Non-object/array types return 0
+  expect(size(null)).toBe(0);
+  expect(size(undefined)).toBe(0);
+  expect(size(0)).toBe(0);
+  expect(size('')).toBe(0);
+  expect(size('abc')).toBe(0);
+  expect(size(true)).toBe(0);
+  expect(size(42)).toBe(0);
 });

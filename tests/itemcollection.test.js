@@ -1,5 +1,6 @@
 import Item from '../src/item';
 import ItemCollection from '../src/itemcollection';
+import Link from '../src/link';
 import fs from 'fs';
 
 let item = JSON.parse(fs.readFileSync('./tests/examples/item.json'));
@@ -78,4 +79,106 @@ test('getTemporalExtents', () => {
 
 test('getAll', () => {
   expect(ic.getAll()).toEqual([new Item(item), new Item(item2)]);
+});
+
+describe('getPaginationLinks', () => {
+  test('returns all nulls when no pagination links exist', () => {
+    let ic2 = new ItemCollection({
+      type: 'FeatureCollection',
+      features: [],
+      links: [],
+    });
+    let pages = ic2.getPaginationLinks();
+    expect(pages.first).toBeNull();
+    expect(pages.prev).toBeNull();
+    expect(pages.next).toBeNull();
+    expect(pages.last).toBeNull();
+  });
+
+  test('returns next link', () => {
+    let ic2 = new ItemCollection({
+      type: 'FeatureCollection',
+      features: [],
+      links: [{ rel: 'next', href: 'https://example.com/items?page=2' }],
+    });
+    let pages = ic2.getPaginationLinks();
+    expect(pages.next).toBeInstanceOf(Link);
+    expect(pages.next.href).toBe('https://example.com/items?page=2');
+    expect(pages.first).toBeNull();
+    expect(pages.prev).toBeNull();
+    expect(pages.last).toBeNull();
+  });
+
+  test('returns prev link', () => {
+    let ic2 = new ItemCollection({
+      type: 'FeatureCollection',
+      features: [],
+      links: [{ rel: 'prev', href: 'https://example.com/items?page=1' }],
+    });
+    let pages = ic2.getPaginationLinks();
+    expect(pages.prev).toBeInstanceOf(Link);
+    expect(pages.prev.href).toBe('https://example.com/items?page=1');
+  });
+
+  test('normalizes "previous" rel to "prev"', () => {
+    let ic2 = new ItemCollection({
+      type: 'FeatureCollection',
+      features: [],
+      links: [{ rel: 'previous', href: 'https://example.com/items?page=1' }],
+    });
+    let pages = ic2.getPaginationLinks();
+    expect(pages.prev).toBeInstanceOf(Link);
+    expect(pages.prev.href).toBe('https://example.com/items?page=1');
+  });
+
+  test('returns first and last links', () => {
+    let ic2 = new ItemCollection({
+      type: 'FeatureCollection',
+      features: [],
+      links: [
+        { rel: 'first', href: 'https://example.com/items?page=1' },
+        { rel: 'last', href: 'https://example.com/items?page=10' },
+      ],
+    });
+    let pages = ic2.getPaginationLinks();
+    expect(pages.first).toBeInstanceOf(Link);
+    expect(pages.first.href).toBe('https://example.com/items?page=1');
+    expect(pages.last).toBeInstanceOf(Link);
+    expect(pages.last.href).toBe('https://example.com/items?page=10');
+  });
+
+  test('returns all pagination links', () => {
+    let ic2 = new ItemCollection({
+      type: 'FeatureCollection',
+      features: [],
+      links: [
+        { rel: 'first', href: 'https://example.com/items?page=1' },
+        { rel: 'prev', href: 'https://example.com/items?page=2' },
+        { rel: 'next', href: 'https://example.com/items?page=4' },
+        { rel: 'last', href: 'https://example.com/items?page=10' },
+      ],
+    });
+    let pages = ic2.getPaginationLinks();
+    expect(pages.first).not.toBeNull();
+    expect(pages.prev).not.toBeNull();
+    expect(pages.next).not.toBeNull();
+    expect(pages.last).not.toBeNull();
+  });
+
+  test('ignores non-pagination links', () => {
+    let ic2 = new ItemCollection({
+      type: 'FeatureCollection',
+      features: [],
+      links: [
+        { rel: 'self', href: 'https://example.com/items' },
+        { rel: 'root', href: 'https://example.com' },
+        { rel: 'next', href: 'https://example.com/items?page=2' },
+      ],
+    });
+    let pages = ic2.getPaginationLinks();
+    expect(pages.next).not.toBeNull();
+    expect(pages.first).toBeNull();
+    expect(pages.prev).toBeNull();
+    expect(pages.last).toBeNull();
+  });
 });

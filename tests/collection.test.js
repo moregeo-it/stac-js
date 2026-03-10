@@ -1,4 +1,5 @@
 import Collection from '../src/collection';
+import Link from '../src/link';
 import fs from 'fs';
 
 let json = JSON.parse(fs.readFileSync('./tests/examples/collection.json'));
@@ -68,4 +69,35 @@ test('getAsset', () => {
 
 test('getAssets', () => {
   expect(c.getAssets()).toEqual([]);
+});
+
+test('getQueryablesLink', () => {
+  let collection = new Collection({
+    ...json,
+    links: [
+      ...json.links,
+      {
+        rel: 'http://www.opengis.net/def/rel/ogc/1.0/queryables',
+        href: 'https://example.com/queryables',
+        type: 'application/schema+json',
+      },
+    ],
+  });
+  let link = collection.getQueryablesLink();
+  expect(link).toBeInstanceOf(Link);
+});
+
+test('getLocaleLink', () => {
+  let collection = new Collection({
+    id: 'test',
+    type: 'Collection',
+    stac_version: '1.1.0',
+    description: 'test',
+    extent: { spatial: { bbox: [[-180, -90, 180, 90]] }, temporal: { interval: [[null, null]] } },
+    license: 'MIT',
+    links: [{ rel: 'alternate', href: 'https://example.com/de', type: 'application/json', hreflang: 'de' }],
+  });
+  let link = collection.getLocaleLink('de');
+  expect(link).toBeInstanceOf(Link);
+  expect(link.href).toBe('https://example.com/de');
 });
