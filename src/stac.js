@@ -25,7 +25,7 @@ class STAC extends STACHypermedia {
    *
    * @returns {boolean} `true` if the object is a STAC entity, `false` otherwise.
    */
-  isSTAC() {
+  get isSTAC() {
     return true;
   }
 
@@ -87,10 +87,10 @@ class STAC extends STACHypermedia {
    * @returns {Array.<STACReference>} Asset or Link
    */
   getThumbnails(browserOnly = true, prefer = null) {
-    let thumbnails = this.getAssets().filter((asset) => asset.isPreview());
+    let thumbnails = this.getAssets().filter((asset) => asset.isPreview);
     // Get from links only if no assets are available as they should usually be the same as in assets
     if (thumbnails.length === 0) {
-      thumbnails = this.getLinks().filter((link) => link.isPreview());
+      thumbnails = this.getLinks().filter((link) => link.isPreview);
     }
     // Some old catalogs use just a asset key
     if (thumbnails.length === 0) {
@@ -177,7 +177,7 @@ class STAC extends STACHypermedia {
     let scores = [];
     let assets = this.getAssetsByTypes(geotiffMediaTypes);
     if (httpOnly) {
-      assets = assets.filter((asset) => asset.isHTTP() && (!cogOnly || asset.isCOG()));
+      assets = assets.filter((asset) => asset.isHTTP && (!cogOnly || asset.isCOG));
     }
     let roles = Object.entries(roleScores);
     for (let asset of assets) {
@@ -190,7 +190,7 @@ class STAC extends STACHypermedia {
           score += Math.max(...result); // Add the highest of the scores
         }
       }
-      if (!cogOnly && asset.isCOG()) {
+      if (!cogOnly && asset.isCOG) {
         score += 2;
       }
       if (asset.findVisualBands()) {

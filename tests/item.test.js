@@ -54,18 +54,18 @@ test('get/setAbsoluteUrl', () => {
 });
 
 test('is...', () => {
-  expect(item.isItem()).toBeTruthy();
-  expect(item.isCatalog()).toBeFalsy();
-  expect(item.isCatalogLike()).toBeFalsy();
-  expect(item.isCollection()).toBeFalsy();
-  expect(item.isItemCollection()).toBeFalsy();
-  expect(item.isCollectionCollection()).toBeFalsy();
-  expect(item.isAsset()).toBeFalsy();
-  expect(item.isLink()).toBeFalsy();
-  expect(item.isBand()).toBeFalsy();
-  expect(item.isSTAC()).toBeTruthy();
-  expect(item.isApiCollection()).toBeFalsy();
-  expect(item.isReference()).toBeFalsy();
+  expect(item.isItem).toBeTruthy();
+  expect(item.isCatalog).toBeFalsy();
+  expect(item.isCatalogLike).toBeFalsy();
+  expect(item.isCollection).toBeFalsy();
+  expect(item.isItemCollection).toBeFalsy();
+  expect(item.isCollectionCollection).toBeFalsy();
+  expect(item.isAsset).toBeFalsy();
+  expect(item.isLink).toBeFalsy();
+  expect(item.isBand).toBeFalsy();
+  expect(item.isSTAC).toBeTruthy();
+  expect(item.isApiCollection).toBeFalsy();
+  expect(item.isReference).toBeFalsy();
 });
 
 test('getObjectType', () => {

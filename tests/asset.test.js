@@ -43,27 +43,27 @@ test('getAbsoluteUrl', () => {
 });
 
 test('is...', () => {
-  expect(asset.isItem()).toBeFalsy();
-  expect(asset.isCatalog()).toBeFalsy();
-  expect(asset.isCatalogLike()).toBeFalsy();
-  expect(asset.isCollection()).toBeFalsy();
-  expect(asset.isItemCollection()).toBeFalsy();
-  expect(asset.isCollectionCollection()).toBeFalsy();
-  expect(asset.isLink()).toBeFalsy();
-  expect(asset.isAsset()).toBeTruthy();
-  expect(asset.isBand()).toBeFalsy();
-  expect(asset.isSTAC()).toBeFalsy();
-  expect(asset.isApiCollection()).toBeFalsy();
-  expect(asset.isReference()).toBeTruthy();
-  expect(def.isAsset()).toBeTruthy();
+  expect(asset.isItem).toBeFalsy();
+  expect(asset.isCatalog).toBeFalsy();
+  expect(asset.isCatalogLike).toBeFalsy();
+  expect(asset.isCollection).toBeFalsy();
+  expect(asset.isItemCollection).toBeFalsy();
+  expect(asset.isCollectionCollection).toBeFalsy();
+  expect(asset.isLink).toBeFalsy();
+  expect(asset.isAsset).toBeTruthy();
+  expect(asset.isBand).toBeFalsy();
+  expect(asset.isSTAC).toBeFalsy();
+  expect(asset.isApiCollection).toBeFalsy();
+  expect(asset.isReference).toBeTruthy();
+  expect(def.isAsset).toBeTruthy();
 });
 
 test('isPreview', () => {
-  expect(asset.isPreview()).toBeFalsy();
-  expect(new Asset({ href: 'example.png', roles: ['abc', 'overview'] }, 'xxx').isPreview()).toBeTruthy();
-  expect(new Asset({ href: 'example.png', roles: ['thumbnail'] }, 'xxx').isPreview()).toBeTruthy();
-  expect(new Asset({ href: 'example.png' }, 'overview').isPreview()).toBeTruthy();
-  expect(new Asset({ href: 'example.png' }, 'thumbnail').isPreview()).toBeTruthy();
+  expect(asset.isPreview).toBeFalsy();
+  expect(new Asset({ href: 'example.png', roles: ['abc', 'overview'] }, 'xxx').isPreview).toBeTruthy();
+  expect(new Asset({ href: 'example.png', roles: ['thumbnail'] }, 'xxx').isPreview).toBeTruthy();
+  expect(new Asset({ href: 'example.png' }, 'overview').isPreview).toBeTruthy();
+  expect(new Asset({ href: 'example.png' }, 'thumbnail').isPreview).toBeTruthy();
 });
 
 test('toJSON', () => {
@@ -118,18 +118,18 @@ test('getAbsoluteUrl', () => {
 });
 
 test('isGeoTIFF', () => {
-  expect(asset.isGeoTIFF()).toBeTruthy();
-  expect(def.isGeoTIFF()).toBeTruthy();
+  expect(asset.isGeoTIFF).toBeTruthy();
+  expect(def.isGeoTIFF).toBeTruthy();
 });
 
 test('isCOG', () => {
-  expect(asset.isCOG()).toBeTruthy();
-  expect(def.isCOG()).toBeTruthy();
+  expect(asset.isCOG).toBeTruthy();
+  expect(def.isCOG).toBeTruthy();
 });
 
 test('isDefinition', () => {
-  expect(asset.isDefinition()).toBeFalsy();
-  expect(def.isDefinition()).toBeTruthy();
+  expect(asset.isDefinition).toBeFalsy();
+  expect(def.isDefinition).toBeTruthy();
 });
 
 test('isType', () => {
@@ -139,8 +139,8 @@ test('isType', () => {
 });
 
 test('isHTTP', () => {
-  expect(asset.isHTTP()).toBeTruthy();
-  expect(def.isHTTP()).toBeFalsy();
+  expect(asset.isHTTP).toBeTruthy();
+  expect(def.isHTTP).toBeFalsy();
 });
 
 test('getBands', () => {

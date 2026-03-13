@@ -25,7 +25,7 @@ class APICollection extends STACHypermedia {
    *
    * @returns {boolean} `true` if the object is a STAC API Collection, `false` otherwise.
    */
-  isApiCollection() {
+  get isApiCollection() {
     return true;
   }
 

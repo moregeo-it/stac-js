@@ -15,16 +15,16 @@ test('Basics', () => {
 });
 
 test('is...', () => {
-  expect(c.isItem()).toBeFalsy();
-  expect(c.isCatalog()).toBeTruthy();
-  expect(c.isCatalogLike()).toBeTruthy();
-  expect(c.isCollection()).toBeFalsy();
-  expect(c.isCollectionCollection()).toBeFalsy();
-  expect(c.isAsset()).toBeFalsy();
-  expect(c.isLink()).toBeFalsy();
-  expect(c.isSTAC()).toBeTruthy();
-  expect(c.isApiCollection()).toBeFalsy();
-  expect(c.isReference()).toBeFalsy();
+  expect(c.isItem).toBeFalsy();
+  expect(c.isCatalog).toBeTruthy();
+  expect(c.isCatalogLike).toBeTruthy();
+  expect(c.isCollection).toBeFalsy();
+  expect(c.isCollectionCollection).toBeFalsy();
+  expect(c.isAsset).toBeFalsy();
+  expect(c.isLink).toBeFalsy();
+  expect(c.isSTAC).toBeTruthy();
+  expect(c.isApiCollection).toBeFalsy();
+  expect(c.isReference).toBeFalsy();
 });
 
 test('getSearchLink', () => {

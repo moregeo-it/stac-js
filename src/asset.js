@@ -46,7 +46,7 @@ class Asset extends STACReference {
    *
    * @returns {boolean} `true` if the object is a STAC Asset, `false` otherwise.
    */
-  isAsset() {
+  get isAsset() {
     return true;
   }
 
@@ -57,7 +57,7 @@ class Asset extends STACReference {
    * @returns {URI|string|null}
    */
   getAbsoluteUrl(stringify = true) {
-    if (this.isDefinition()) {
+    if (this.isDefinition) {
       return null;
     }
     return super.getAbsoluteUrl(stringify);
@@ -203,7 +203,7 @@ class Asset extends STACReference {
    *
    * @returns {boolean} `true` if this asset is an Item Asset definition, `false` otherwise.
    */
-  isDefinition() {
+  get isDefinition() {
     return !hasText(this.href);
   }
 
@@ -214,11 +214,11 @@ class Asset extends STACReference {
    *
    * @returns {boolean|null} `true` if this asset is available via HTTP or HTTPS, `false` or `null` otherwise.
    */
-  isHTTP() {
-    if (this.isDefinition()) {
+  get isHTTP() {
+    if (this.isDefinition) {
       return null;
     }
-    return super.isHTTP();
+    return super.isHTTP;
   }
 
   /**
@@ -229,7 +229,7 @@ class Asset extends STACReference {
    *
    * @returns {boolean} `true` if the asset is a preview, `false` otherwise.
    */
-  isPreview() {
+  get isPreview() {
     const roles = ['thumbnail', 'overview'];
     if (roles.includes(this.getKey())) {
       return true;

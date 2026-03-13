@@ -19,18 +19,18 @@ test('Basics', () => {
 });
 
 test('is...', () => {
-  expect(ic.isItem()).toBeFalsy();
-  expect(ic.isCatalog()).toBeFalsy();
-  expect(ic.isCatalogLike()).toBeFalsy();
-  expect(ic.isCollection()).toBeFalsy();
-  expect(ic.isItemCollection()).toBeTruthy();
-  expect(ic.isCollectionCollection()).toBeFalsy();
-  expect(ic.isAsset()).toBeFalsy();
-  expect(ic.isLink()).toBeFalsy();
-  expect(ic.isBand()).toBeFalsy();
-  expect(ic.isSTAC()).toBeFalsy();
-  expect(ic.isApiCollection()).toBeTruthy();
-  expect(ic.isReference()).toBeFalsy();
+  expect(ic.isItem).toBeFalsy();
+  expect(ic.isCatalog).toBeFalsy();
+  expect(ic.isCatalogLike).toBeFalsy();
+  expect(ic.isCollection).toBeFalsy();
+  expect(ic.isItemCollection).toBeTruthy();
+  expect(ic.isCollectionCollection).toBeFalsy();
+  expect(ic.isAsset).toBeFalsy();
+  expect(ic.isLink).toBeFalsy();
+  expect(ic.isBand).toBeFalsy();
+  expect(ic.isSTAC).toBeFalsy();
+  expect(ic.isApiCollection).toBeTruthy();
+  expect(ic.isReference).toBeFalsy();
 });
 
 test('isResponse', () => {

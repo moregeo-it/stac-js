@@ -58,7 +58,7 @@ class CollectionCollection extends APICollection {
    *
    * @returns {boolean} `true` if the object is a STAC CollectionCollection, `false` otherwise.
    */
-  isCollectionCollection() {
+  get isCollectionCollection() {
     return true;
   }
 

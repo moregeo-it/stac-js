@@ -46,7 +46,7 @@ class STACObject {
    *
    * @returns {boolean} `true` if the object is a STAC Item, `false` otherwise.
    */
-  isItem() {
+  get isItem() {
     return this.type === 'Feature';
   }
 
@@ -55,7 +55,7 @@ class STACObject {
    *
    * @returns {boolean} `true` if the object is a STAC Catalog, `false` otherwise.
    */
-  isCatalog() {
+  get isCatalog() {
     return this.type === 'Catalog';
   }
 
@@ -64,8 +64,8 @@ class STACObject {
    *
    * @returns {boolean} `true` if the object is a "catalog-like", `false` otherwise.
    */
-  isCatalogLike() {
-    return this.isCatalog() || this.isCollection();
+  get isCatalogLike() {
+    return this.isCatalog || this.isCollection;
   }
 
   /**
@@ -73,7 +73,7 @@ class STACObject {
    *
    * @returns {boolean} `true` if the object is a STAC Collection, `false` otherwise.
    */
-  isCollection() {
+  get isCollection() {
     return this.type === 'Collection';
   }
 
@@ -82,7 +82,7 @@ class STACObject {
    *
    * @returns {boolean} `true` if the object is a STAC ItemCollection, `false` otherwise.
    */
-  isItemCollection() {
+  get isItemCollection() {
     return this.type === 'FeatureCollection';
   }
 
@@ -91,7 +91,7 @@ class STACObject {
    *
    * @returns {boolean} `true` if the object is a STAC CollectionCollection, `false` otherwise.
    */
-  isCollectionCollection() {
+  get isCollectionCollection() {
     return false;
   }
 
@@ -104,7 +104,7 @@ class STACObject {
    *
    * @returns {boolean} `true` if the object is a STAC reference, `false` otherwise.
    */
-  isReference() {
+  get isReference() {
     return false;
   }
 
@@ -114,7 +114,7 @@ class STACObject {
    *
    * @returns {boolean} `true` if the object is a STAC API Collection, `false` otherwise.
    */
-  isApiCollection() {
+  get isApiCollection() {
     return false;
   }
 
@@ -124,7 +124,7 @@ class STACObject {
    *
    * @returns {boolean} `true` if the object is a STAC entity, `false` otherwise.
    */
-  isSTAC() {
+  get isSTAC() {
     return false;
   }
 
@@ -133,7 +133,7 @@ class STACObject {
    *
    * @returns {boolean} `true` if the object is a STAC Asset, `false` otherwise.
    */
-  isAsset() {
+  get isAsset() {
     return false;
   }
 
@@ -142,7 +142,7 @@ class STACObject {
    *
    * @returns {boolean} `true` if the object is a STAC Link, `false` otherwise.
    */
-  isLink() {
+  get isLink() {
     return false;
   }
 
@@ -151,7 +151,7 @@ class STACObject {
    *
    * @returns {boolean} `true` if the object is a STAC Band, `false` otherwise.
    */
-  isBand() {
+  get isBand() {
     return false;
   }
 

@@ -42,23 +42,23 @@ test('getAbsoluteUrl', () => {
 });
 
 test('is...', () => {
-  expect(link.isItem()).toBeFalsy();
-  expect(link.isCatalog()).toBeFalsy();
-  expect(link.isCatalogLike()).toBeFalsy();
-  expect(link.isCollection()).toBeFalsy();
-  expect(link.isItemCollection()).toBeFalsy();
-  expect(link.isCollectionCollection()).toBeFalsy();
-  expect(link.isAsset()).toBeFalsy();
-  expect(link.isLink()).toBeTruthy();
-  expect(link.isSTAC()).toBeFalsy();
-  expect(link.isApiCollection()).toBeFalsy();
-  expect(link.isReference()).toBeTruthy();
-  expect(link.isBand()).toBeFalsy();
+  expect(link.isItem).toBeFalsy();
+  expect(link.isCatalog).toBeFalsy();
+  expect(link.isCatalogLike).toBeFalsy();
+  expect(link.isCollection).toBeFalsy();
+  expect(link.isItemCollection).toBeFalsy();
+  expect(link.isCollectionCollection).toBeFalsy();
+  expect(link.isAsset).toBeFalsy();
+  expect(link.isLink).toBeTruthy();
+  expect(link.isSTAC).toBeFalsy();
+  expect(link.isApiCollection).toBeFalsy();
+  expect(link.isReference).toBeTruthy();
+  expect(link.isBand).toBeFalsy();
 });
 
 test('isPreview', () => {
-  expect(link.isPreview()).toBeFalsy();
-  expect(new Link({ href: 'example.png', rel: 'preview' }).isPreview()).toBeTruthy();
+  expect(link.isPreview).toBeFalsy();
+  expect(new Link({ href: 'example.png', rel: 'preview' }).isPreview).toBeTruthy();
 });
 
 test('canBrowserDisplayImage', () => {

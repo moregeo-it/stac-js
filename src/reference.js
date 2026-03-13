@@ -105,7 +105,7 @@ class STACReference extends STACObject {
    *
    * @returns {boolean} `true` if the object is a STAC reference, `false` otherwise.
    */
-  isReference() {
+  get isReference() {
     return true;
   }
 
@@ -114,7 +114,7 @@ class STACReference extends STACObject {
    *
    * @returns {boolean} `true` is this entity is a GeoTiff, `false` otherwise.
    */
-  isGeoTIFF() {
+  get isGeoTIFF() {
     return this.isType(geotiffMediaTypes);
   }
 
@@ -123,7 +123,7 @@ class STACReference extends STACObject {
    *
    * @returns {boolean} `true` is this entity is a COG, `false` otherwise.
    */
-  isCOG() {
+  get isCOG() {
     return this.isType(cogMediaTypes);
   }
 
@@ -134,7 +134,7 @@ class STACReference extends STACObject {
    *
    * @returns {boolean|null} `true` is this entity is available via HTTP or HTTPS, `false` or `null` otherwise.
    */
-  isHTTP() {
+  get isHTTP() {
     let uri = this.getAbsoluteUrl(false);
     if (!uri) {
       return null;
@@ -148,7 +148,7 @@ class STACReference extends STACObject {
    *
    * @returns {boolean} `true` if the entity is a preview, `false` otherwise.
    */
-  isPreview() {
+  get isPreview() {
     return false;
   }
 }
