@@ -84,10 +84,13 @@ class STAC extends STACHypermedia {
    *
    * @param {boolean} browserOnly - Return only images that can be shown in a browser natively (PNG/JPG/GIF/WEBP + HTTP/S).
    * @param {string|null} prefer - If not `null` (default), prefers a role over the other. Either `thumbnail` or `overview`.
+   * @param {boolean} includeGraphic - Also include assets with the role `graphic`.
    * @returns {Array.<STACReference>} Asset or Link
    */
-  getThumbnails(browserOnly = true, prefer = null) {
-    let thumbnails = this.getAssets().filter((asset) => asset.isPreview);
+  getThumbnails(browserOnly = true, prefer = null, includeGraphic = false) {
+    let thumbnails = this.getAssets().filter(
+      (asset) => asset.isPreview || (includeGraphic && asset.hasRole('graphic')),
+    );
     // Get from links only if no assets are available as they should usually be the same as in assets
     if (thumbnails.length === 0) {
       thumbnails = this.getLinks().filter((link) => link.isPreview);
@@ -107,8 +110,8 @@ class STAC extends STACHypermedia {
       // Prefer one role over the other.
       // The two step approach with two filters ensures the same sort bevahiour across all browsers:
       // see https://github.com/radiantearth/stac-browser/issues/370
-      let filter = (img) => (Array.isArray(img.roles) && img.roles.includes(prefer)) || img.getKey() === prefer;
-      thumbnails = thumbnails.filter(filter).concat(thumbnails.filter((img) => !filter(img)));
+      let preferFilter = (img) => (Array.isArray(img.roles) && img.roles.includes(prefer)) || img.getKey() === prefer;
+      thumbnails = thumbnails.filter(preferFilter).concat(thumbnails.filter((img) => !preferFilter(img)));
     }
     return thumbnails;
   }

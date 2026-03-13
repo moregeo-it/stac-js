@@ -124,8 +124,13 @@ test('getBands', () => {
 });
 
 test('getThumbnails', () => {
-  expect(item.getThumbnails()).toEqual([new Asset(json.assets.thumbnail, 'thumbnail', item)]);
+  const thumbnail = new Asset(json.assets.thumbnail, 'thumbnail', item);
+  expect(item.getThumbnails()).toEqual([thumbnail]);
   expect(item2.getThumbnails()).toEqual([new Asset(json2.assets.thumbnail, 'thumbnail', item2)]);
+  // with graphics
+  const graphic = new Asset(json.assets.chart, 'chart', item);
+  expect(item.getThumbnails(true, 'graphic', true)).toEqual([graphic, thumbnail]);
+  expect(item.getThumbnails(true, 'thumbnail', true)).toEqual([thumbnail, graphic]);
 });
 
 test('getAsset', () => {
