@@ -51,6 +51,17 @@ class Asset extends STACReference {
   }
 
   /**
+   * Returns whether this asset is an alternate asset.
+   *
+   * An alternate asset has another Asset as its context.
+   *
+   * @returns {boolean} `true` if the asset is an alternate, `false` otherwise.
+   */
+  get isAlternate() {
+    return this._context instanceof Asset;
+  }
+
+  /**
    * Gets the URL of the asset as absolute URL.
    *
    * @param {boolean} stringify If `true` (default), a string is returned, otherwise a URI object.
@@ -225,11 +236,15 @@ class Asset extends STACReference {
    * Returns whether the asset is a preview image (thumbnail / overview).
    *
    * An asset is a preview if one of the roles is 'thumbnail' or 'overview'.
-   * it is also a preview if the key is 'thumbnail' or 'overview'.
+   * It is also a preview if the key is 'thumbnail' or 'overview'.
+   * For alternate assets, delegates to the parent asset.
    *
    * @returns {boolean} `true` if the asset is a preview, `false` otherwise.
    */
   get isPreview() {
+    if (this.isAlternate) {
+      return this._context.isPreview;
+    }
     const roles = ['thumbnail', 'overview'];
     if (roles.includes(this.getKey())) {
       return true;
@@ -253,6 +268,30 @@ class Asset extends STACReference {
       return true;
     }
     return Array.isArray(this.roles) && Boolean(this.roles.find((role) => roles.includes(role)));
+  }
+
+  /**
+   * Returns the full merged metadata for an alternate asset.
+   *
+   * The result contains all properties from the parent asset merged with
+   * the alternate asset's own properties (which take precedence).
+   * The `alternate` key is excluded from the result.
+   *
+   * For non-alternate assets, returns a clone without the `alternate` key.
+   *
+   * @returns {Asset} Merged Asset object
+   */
+  fillAlternate() {
+    let data;
+    if (this.isAlternate) {
+      const inherit = this._context.toJSON();
+      delete inherit.alternate;
+      data = Object.assign(inherit, this.toJSON());
+    } else {
+      data = this.toJSON();
+      delete data.alternate;
+    }
+    return new Asset(data, this.getKey(), this.getContext());
   }
 
   /**

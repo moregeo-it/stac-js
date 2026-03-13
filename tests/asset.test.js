@@ -97,19 +97,75 @@ test('getMetadata', () => {
   expect(def.getMetadata('proj:code')).toBe('EPSG:32659');
 });
 
-test('alternate assets', () => {
+describe('alternate assets', () => {
   let json2 = JSON.parse(fs.readFileSync('./tests/examples/item-cdse.json'));
   let item2 = new Item(json2);
-  let asset = item2.assets.B01_60m;
-  let altAsset = asset.alternate.s3;
-  // Check container asset
-  expect(asset.getMetadata('alternate:name')).toBe('HTTPS');
-  // Check alternate asset support
-  expect(altAsset instanceof Asset).toBeTruthy();
-  // Check alternate asset metadata, not retrieved from container asset
-  expect(altAsset.getMetadata('alternate:name')).toBe('S3');
-  // Get metadata from container asset of not set in alternate asset
-  expect(altAsset.getMetadata('nodata')).toBe(0);
+  let cdseAsset = item2.assets.B01_60m;
+  let altAsset = cdseAsset.alternate.s3;
+
+  test('metadata inheritance', () => {
+    // Check container asset
+    expect(cdseAsset.getMetadata('alternate:name')).toBe('HTTPS');
+    // Check alternate asset support
+    expect(altAsset instanceof Asset).toBeTruthy();
+    // Check alternate asset metadata, not retrieved from container asset
+    expect(altAsset.getMetadata('alternate:name')).toBe('S3');
+    // Get metadata from container asset of not set in alternate asset
+    expect(altAsset.getMetadata('nodata')).toBe(0);
+  });
+
+  test('isAlternate', () => {
+    expect(cdseAsset.isAlternate).toBeFalsy();
+    expect(altAsset.isAlternate).toBeTruthy();
+    // Regular asset without alternate
+    expect(asset.isAlternate).toBeFalsy();
+  });
+
+  test('isPreview for alternate assets', () => {
+    // Main asset with thumbnail role
+    let mainAsset = new Asset({ href: 'example.png', roles: ['thumbnail'] }, 'thumb');
+    expect(mainAsset.isPreview).toBeTruthy();
+    // Alternate of a thumbnail asset should also be a preview
+    let altOfThumb = new Asset({ href: 's3://bucket/example.png', 'alternate:name': 'S3' }, 's3', mainAsset);
+    expect(altOfThumb.isPreview).toBeTruthy();
+
+    // Main asset with data role
+    let dataAsset = new Asset({ href: 'data.tif', roles: ['data'] }, 'data');
+    expect(dataAsset.isPreview).toBeFalsy();
+    // Alternate of a data asset should not be a preview
+    let altOfData = new Asset({ href: 's3://bucket/data.tif', 'alternate:name': 'S3' }, 's3', dataAsset);
+    expect(altOfData.isPreview).toBeFalsy();
+
+    // Real alternate from CDSE should not be preview (B01_60m is not a preview)
+    expect(cdseAsset.isPreview).toBeFalsy();
+    expect(altAsset.isPreview).toBeFalsy();
+  });
+
+  test('fillAlternate', () => {
+    let merged = altAsset.fillAlternate();
+    expect(merged instanceof Asset).toBeTruthy();
+    // Should include properties from the parent asset
+    expect(merged.nodata).toBe(0);
+    expect(merged.type).toBe('image/jp2');
+    expect(merged.roles).toContain('data');
+    expect(merged.roles).toContain('reflectance');
+    // Should have the alternate's own properties override
+    expect(merged['alternate:name']).toBe('S3');
+    expect(merged.href).toBe(altAsset.href);
+    // Should not include the alternate key
+    expect(merged.alternate).toBeUndefined();
+  });
+
+  test('fillAlternate for non-alternate', () => {
+    let merged = cdseAsset.fillAlternate();
+    expect(merged instanceof Asset).toBeTruthy();
+    // Should not include the alternate key
+    expect(merged.alternate).toBeUndefined();
+    // Should still include own properties
+    expect(merged.nodata).toBe(0);
+    expect(merged.type).toBe('image/jp2');
+    expect(merged['alternate:name']).toBe('HTTPS');
+  });
 });
 
 test('getAbsoluteUrl', () => {
