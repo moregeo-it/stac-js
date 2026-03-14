@@ -47,7 +47,7 @@ class Band extends STACObject {
    *
    * @returns {boolean} `true` if the object is a STAC Band, `false` otherwise.
    */
-  isBand() {
+  get isBand() {
     return true;
   }
 

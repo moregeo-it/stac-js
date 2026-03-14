@@ -35,18 +35,18 @@ describe('constructor', () => {
 });
 
 test('is...', () => {
-  expect(band.isItem()).toBeFalsy();
-  expect(band.isCatalog()).toBeFalsy();
-  expect(band.isCatalogLike()).toBeFalsy();
-  expect(band.isCollection()).toBeFalsy();
-  expect(band.isItemCollection()).toBeFalsy();
-  expect(band.isCollectionCollection()).toBeFalsy();
-  expect(band.isLink()).toBeFalsy();
-  expect(band.isAsset()).toBeFalsy();
-  expect(band.isBand()).toBeTruthy();
-  expect(band.isSTAC()).toBeFalsy();
-  expect(band.isApiCollection()).toBeFalsy();
-  expect(band.isReference()).toBeFalsy();
+  expect(band.isItem).toBeFalsy();
+  expect(band.isCatalog).toBeFalsy();
+  expect(band.isCatalogLike).toBeFalsy();
+  expect(band.isCollection).toBeFalsy();
+  expect(band.isItemCollection).toBeFalsy();
+  expect(band.isCollectionCollection).toBeFalsy();
+  expect(band.isLink).toBeFalsy();
+  expect(band.isAsset).toBeFalsy();
+  expect(band.isBand).toBeTruthy();
+  expect(band.isSTAC).toBeFalsy();
+  expect(band.isApiCollection).toBeFalsy();
+  expect(band.isReference).toBeFalsy();
 });
 
 test('toJSON', () => {

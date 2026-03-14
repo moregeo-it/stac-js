@@ -54,18 +54,18 @@ test('get/setAbsoluteUrl', () => {
 });
 
 test('is...', () => {
-  expect(item.isItem()).toBeTruthy();
-  expect(item.isCatalog()).toBeFalsy();
-  expect(item.isCatalogLike()).toBeFalsy();
-  expect(item.isCollection()).toBeFalsy();
-  expect(item.isItemCollection()).toBeFalsy();
-  expect(item.isCollectionCollection()).toBeFalsy();
-  expect(item.isAsset()).toBeFalsy();
-  expect(item.isLink()).toBeFalsy();
-  expect(item.isBand()).toBeFalsy();
-  expect(item.isSTAC()).toBeTruthy();
-  expect(item.isApiCollection()).toBeFalsy();
-  expect(item.isReference()).toBeFalsy();
+  expect(item.isItem).toBeTruthy();
+  expect(item.isCatalog).toBeFalsy();
+  expect(item.isCatalogLike).toBeFalsy();
+  expect(item.isCollection).toBeFalsy();
+  expect(item.isItemCollection).toBeFalsy();
+  expect(item.isCollectionCollection).toBeFalsy();
+  expect(item.isAsset).toBeFalsy();
+  expect(item.isLink).toBeFalsy();
+  expect(item.isBand).toBeFalsy();
+  expect(item.isSTAC).toBeTruthy();
+  expect(item.isApiCollection).toBeFalsy();
+  expect(item.isReference).toBeFalsy();
 });
 
 test('getObjectType', () => {
@@ -124,8 +124,13 @@ test('getBands', () => {
 });
 
 test('getThumbnails', () => {
-  expect(item.getThumbnails()).toEqual([new Asset(json.assets.thumbnail, 'thumbnail', item)]);
+  const thumbnail = new Asset(json.assets.thumbnail, 'thumbnail', item);
+  expect(item.getThumbnails()).toEqual([thumbnail]);
   expect(item2.getThumbnails()).toEqual([new Asset(json2.assets.thumbnail, 'thumbnail', item2)]);
+  // with graphics
+  const graphic = new Asset(json.assets.chart, 'chart', item);
+  expect(item.getThumbnails(true, 'graphic', true)).toEqual([graphic, thumbnail]);
+  expect(item.getThumbnails(true, 'thumbnail', true)).toEqual([thumbnail, graphic]);
 });
 
 test('getAsset', () => {

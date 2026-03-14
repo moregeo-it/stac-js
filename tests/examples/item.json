@@ -144,11 +144,19 @@
       ]
     },
     "thumbnail": {
-      "href": "./20201211_223832_CS2.jpg",
+      "href": "./20201211_223832_CS2.png",
       "title": "Thumbnail",
       "type": "image/png",
       "roles": [
         "thumbnail"
+      ]
+    },
+    "chart": {
+      "href": "./chart.png",
+      "title": "Statistics about the data",
+      "type": "image/png",
+      "roles": [
+        "graphic"
       ]
     },
     "visual": {

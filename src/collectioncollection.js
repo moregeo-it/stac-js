@@ -3,8 +3,7 @@ import { unionDateTime } from './datetime.js';
 import { unionBoundingBox } from './geo.js';
 import { isObject } from './utils.js';
 import APICollection from './apicollection.js';
-import { isMediaType, schemaMediaType } from './mediatypes.js';
-import { queryables } from './relationtypes.js';
+import { queryables, sortables } from './relationtypes.js';
 
 /**
  * Represents an Collections containing Collections.
@@ -58,7 +57,7 @@ class CollectionCollection extends APICollection {
    *
    * @returns {boolean} `true` if the object is a STAC CollectionCollection, `false` otherwise.
    */
-  isCollectionCollection() {
+  get isCollectionCollection() {
     return true;
   }
 
@@ -117,8 +116,16 @@ class CollectionCollection extends APICollection {
    * @returns {Link|null} The queryables link
    */
   getQueryablesLink() {
-    const links = this.getLinksWithRels(queryables).filter((link) => isMediaType(link.type, schemaMediaType, true));
-    return links[0] || null;
+    return this.getSchemaLinkWithRels(queryables);
+  }
+
+  /**
+   * Returns the link for sortables.
+   *
+   * @returns {Link|null} The sortables link
+   */
+  getSortablesLink() {
+    return this.getSchemaLinkWithRels(sortables);
   }
 }
 

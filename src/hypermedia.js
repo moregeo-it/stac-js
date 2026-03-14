@@ -1,6 +1,6 @@
 import STACObject from './object.js';
 import Link from './link.js';
-import { isStacMediaType } from './mediatypes.js';
+import { isMediaType, isStacMediaType, schemaMediaType } from './mediatypes.js';
 import { hasText, isObject, URI } from './utils.js';
 
 /**
@@ -52,22 +52,22 @@ class STACHypermedia extends STACObject {
   }
 
   /**
+   * Returns all links with the given relation type that have a STAC media type.
    *
-   * @todo
-   * @param {string} rel
-   * @param {boolean} allowUndefined
-   * @returns {Array.<Link>}
+   * @param {string} rel The relation type to filter by.
+   * @param {boolean} allowUndefined If `true` (default), links without a media type are included.
+   * @returns {Array.<Link>} The matching links with a STAC media type.
    */
   getStacLinksWithRel(rel, allowUndefined = true) {
     return this.getLinksWithRels([rel]).filter((link) => isStacMediaType(link.type, allowUndefined));
   }
 
   /**
+   * Returns the first link with the given relation type that has a STAC media type.
    *
-   * @todo
-   * @param {string} rel
-   * @param {boolean} allowUndefined
-   * @returns {Link}
+   * @param {string} rel The relation type to filter by.
+   * @param {boolean} allowUndefined If `true` (default), links without a media type are included.
+   * @returns {Link|null} The first matching link, or `null` if none found.
    */
   getStacLinkWithRel(rel, allowUndefined = true) {
     const links = this.getStacLinksWithRel(rel, allowUndefined);
@@ -79,39 +79,50 @@ class STACHypermedia extends STACObject {
   }
 
   /**
+   * Returns the first link with the given relation type that has a JSON Schema media type.
    *
-   * @todo
-   * @returns {Array.<Link>}
+   * @param {*} rels The relation types to filter by.
+   * @return {Link|null} The first matching link, or `null` if none found.
+   */
+  getSchemaLinkWithRels(rels) {
+    const links = this.getLinksWithRels(rels).filter((link) => isMediaType(link.type, schemaMediaType, true));
+    return links[0] || null;
+  }
+
+  /**
+   * Returns all valid links, filtering out entries that are not objects or lack an `href` property.
+   *
+   * @returns {Array.<Link>} An array of valid links.
    */
   getLinks() {
     return Array.isArray(this.links) ? this.links.filter((link) => isObject(link) && hasText(link.href)) : [];
   }
 
   /**
+   * Returns the first link with the given relation type.
    *
-   * @todo
-   * @param {string} rel
-   * @returns {Link|null}
+   * @param {string} rel The relation type to search for.
+   * @returns {Link|null} The first matching link, or `null` if none found.
    */
   getLinkWithRel(rel) {
     return this.getLinks().find((link) => link.rel === rel) || null;
   }
 
   /**
+   * Returns all links whose relation type is included in the given list.
    *
-   * @todo
-   * @param {Array.<string>} rels
-   * @returns {Array.<Link>}
+   * @param {Array.<string>} rels The relation types to filter by.
+   * @returns {Array.<Link>} The matching links.
    */
   getLinksWithRels(rels) {
     return this.getLinks().filter((link) => rels.includes(link.rel));
   }
 
   /**
+   * Returns all links whose relation type is *not* included in the given list.
    *
-   * @todo
-   * @param {Array.<string>} rels
-   * @returns {Array.<Link>}
+   * @param {Array.<string>} rels The relation types to exclude.
+   * @returns {Array.<Link>} The links that do not match any of the given relation types.
    */
   getLinksWithOtherRels(rels) {
     return this.getLinks().filter((link) => !rels.includes(link.rel));

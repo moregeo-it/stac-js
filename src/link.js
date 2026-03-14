@@ -29,7 +29,7 @@ class Link extends STACReference {
    *
    * @returns {boolean} `true` if the object is a STAC Link, `false` otherwise.
    */
-  isLink() {
+  get isLink() {
     return true;
   }
 
@@ -47,7 +47,7 @@ class Link extends STACReference {
    *
    * @returns {boolean} `true` if the link is a preview, `false` otherwise.
    */
-  isPreview() {
+  get isPreview() {
     return this.rel === 'preview';
   }
 

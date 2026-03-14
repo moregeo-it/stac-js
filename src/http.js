@@ -8,25 +8,26 @@ import { URI } from './utils.js';
 export const browserProtocols = ['http', 'https'];
 
 /**
+ * Converts a relative URL to an absolute URL based on the given base URL.
  *
- * @todo
- * @param {string} href
- * @param {string} baseUrl
- * @param {boolean} stringify
- * @returns {string|URI}
+ * @param {string} href The URL to convert.
+ * @param {string} baseUrl The base URL to resolve against.
+ * @param {boolean} stringify If `true` (default), returns a string, otherwise a URI object.
+ * @returns {string|URI} The absolute URL.
  */
 export function toAbsolute(href, baseUrl, stringify = true) {
   return normalizeUri(href, baseUrl, false, stringify);
 }
 
 /**
+ * Normalizes a URI by resolving it against an optional base URL and removing trailing slashes.
+ * Optionally strips query parameters and fragments.
  *
- * @todo
- * @param {string} href
- * @param {string|null} baseUrl
- * @param {boolean} noParams
- * @param {boolean} stringify
- * @returns {string|URI}
+ * @param {string} href The URL to normalize.
+ * @param {string|null} baseUrl The base URL to resolve against, or `null` to skip resolution.
+ * @param {boolean} noParams If `true`, removes query parameters and fragments.
+ * @param {boolean} stringify If `true` (default), returns a string, otherwise a URI object.
+ * @returns {string|URI} The normalized URL.
  */
 export function normalizeUri(href, baseUrl = null, noParams = false, stringify = true) {
   // Parse URL and make absolute, if required

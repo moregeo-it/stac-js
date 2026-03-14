@@ -25,7 +25,7 @@ class STAC extends STACHypermedia {
    *
    * @returns {boolean} `true` if the object is a STAC entity, `false` otherwise.
    */
-  isSTAC() {
+  get isSTAC() {
     return true;
   }
 
@@ -84,13 +84,16 @@ class STAC extends STACHypermedia {
    *
    * @param {boolean} browserOnly - Return only images that can be shown in a browser natively (PNG/JPG/GIF/WEBP + HTTP/S).
    * @param {string|null} prefer - If not `null` (default), prefers a role over the other. Either `thumbnail` or `overview`.
+   * @param {boolean} includeGraphic - Also include assets with the role `graphic`.
    * @returns {Array.<STACReference>} Asset or Link
    */
-  getThumbnails(browserOnly = true, prefer = null) {
-    let thumbnails = this.getAssets().filter((asset) => asset.isPreview());
+  getThumbnails(browserOnly = true, prefer = null, includeGraphic = false) {
+    let thumbnails = this.getAssets().filter(
+      (asset) => asset.isPreview || (includeGraphic && asset.hasRole('graphic')),
+    );
     // Get from links only if no assets are available as they should usually be the same as in assets
     if (thumbnails.length === 0) {
-      thumbnails = this.getLinks().filter((link) => link.isPreview());
+      thumbnails = this.getLinks().filter((link) => link.isPreview);
     }
     // Some old catalogs use just a asset key
     if (thumbnails.length === 0) {
@@ -107,8 +110,8 @@ class STAC extends STACHypermedia {
       // Prefer one role over the other.
       // The two step approach with two filters ensures the same sort bevahiour across all browsers:
       // see https://github.com/radiantearth/stac-browser/issues/370
-      let filter = (img) => (Array.isArray(img.roles) && img.roles.includes(prefer)) || img.getKey() === prefer;
-      thumbnails = thumbnails.filter(filter).concat(thumbnails.filter((img) => !filter(img)));
+      let preferFilter = (img) => (Array.isArray(img.roles) && img.roles.includes(prefer)) || img.getKey() === prefer;
+      thumbnails = thumbnails.filter(preferFilter).concat(thumbnails.filter((img) => !preferFilter(img)));
     }
     return thumbnails;
   }
@@ -191,7 +194,7 @@ class STAC extends STACHypermedia {
     let assets = this.getAssetsByTypes(mediaTypes[type]);
     if (httpOnly) {
       // todo: This doesn't cater for cases where e.g. S3 is the main asset and the HTTP asset is the alternate asset.
-      assets = assets.filter((asset) => asset.isHTTP() && (!optimizedOnly || asset.isType(optimizedTypes[type])));
+      assets = assets.filter((asset) => asset.isHTTP && (!optimizedOnly || asset.isType(optimizedTypes[type])));
     }
     let roles = Object.entries(roleScores);
     for (let asset of assets) {
@@ -253,10 +256,10 @@ class STAC extends STACHypermedia {
   }
 
   /**
+   * Returns the asset with the given key.
    *
-   * @todo
-   * @param {string} key
-   * @returns {Asset|null}
+   * @param {string} key The asset key.
+   * @returns {Asset|null} The matching asset, or `null` if not found.
    */
   getAsset(key) {
     if (!isObject(this.assets)) {
@@ -266,9 +269,9 @@ class STAC extends STACHypermedia {
   }
 
   /**
+   * Returns all assets as an array.
    *
-   * @todo
-   * @returns {Array.<Asset>}
+   * @returns {Array.<Asset>} An array of all assets.
    */
   getAssets() {
     if (!isObject(this.assets)) {
@@ -289,11 +292,11 @@ class STAC extends STACHypermedia {
   }
 
   /**
+   * Returns the first asset that contains the given role.
    *
-   * @todo
-   * @param {string} role
-   * @param {boolean} includeKey
-   * @returns {Asset|null}
+   * @param {string} role The role to search for.
+   * @param {boolean} includeKey If `true`, also matches when the asset key equals the role.
+   * @returns {Asset|null} The first matching asset, or `null` if none found.
    */
   getAssetWithRole(role, includeKey = false) {
     let assets = this.getAssetsWithRoles([role], includeKey);
@@ -301,10 +304,10 @@ class STAC extends STACHypermedia {
   }
 
   /**
+   * Returns all assets whose media type matches one of the given types.
    *
-   * @todo
-   * @param {Array.<string>} types
-   * @returns {Array.<Asset>}
+   * @param {Array.<string>} types The media types to filter by.
+   * @returns {Array.<Asset>} The matching assets.
    */
   getAssetsByTypes(types) {
     return this.getAssets().filter((asset) => isMediaType(asset.type, types));
