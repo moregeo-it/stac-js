@@ -1,5 +1,5 @@
 import { browserProtocols, toAbsolute } from './http.js';
-import { cogMediaTypes, geotiffMediaTypes, isMediaType } from './mediatypes.js';
+import { isMediaType } from './mediatypes.js';
 import { hasText, URI } from './utils.js';
 import STACObject from './object.js';
 import { browserImageTypes } from './mediatypes.js';

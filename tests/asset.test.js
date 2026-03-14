@@ -173,16 +173,6 @@ test('getAbsoluteUrl', () => {
   expect(def.getAbsoluteUrl()).toBeNull();
 });
 
-test('isGeoTIFF', () => {
-  expect(asset.isGeoTIFF).toBeTruthy();
-  expect(def.isGeoTIFF).toBeTruthy();
-});
-
-test('isCOG', () => {
-  expect(asset.isCOG).toBeTruthy();
-  expect(def.isCOG).toBeTruthy();
-});
-
 test('isDefinition', () => {
   expect(asset.isDefinition).toBeFalsy();
   expect(def.isDefinition).toBeTruthy();
