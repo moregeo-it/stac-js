@@ -20,3 +20,13 @@ export const queryables = [
   'http://www.opengis.net/def/rel/ogc/1.0/queryables', // STAC and OGC APIs
   'ogc-rel:queryables', // Alternative in OGC APIs
 ];
+
+/**
+ * All relation types used by Sortables in STAC and OGC APIs.
+ *
+ * @type {Array.<string>}
+ */
+export const sortables = [
+  'http://www.opengis.net/def/rel/ogc/1.0/sortables', // STAC and OGC APIs
+  'ogc-rel:sortables', // Alternative in OGC APIs
+];

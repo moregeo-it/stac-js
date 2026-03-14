@@ -242,10 +242,10 @@ class STAC extends STACHypermedia {
   }
 
   /**
+   * Returns the asset with the given key.
    *
-   * @todo
-   * @param {string} key
-   * @returns {Asset|null}
+   * @param {string} key The asset key.
+   * @returns {Asset|null} The matching asset, or `null` if not found.
    */
   getAsset(key) {
     if (!isObject(this.assets)) {
@@ -255,9 +255,9 @@ class STAC extends STACHypermedia {
   }
 
   /**
+   * Returns all assets as an array.
    *
-   * @todo
-   * @returns {Array.<Asset>}
+   * @returns {Array.<Asset>} An array of all assets.
    */
   getAssets() {
     if (!isObject(this.assets)) {
@@ -278,11 +278,11 @@ class STAC extends STACHypermedia {
   }
 
   /**
+   * Returns the first asset that contains the given role.
    *
-   * @todo
-   * @param {string} role
-   * @param {boolean} includeKey
-   * @returns {Asset|null}
+   * @param {string} role The role to search for.
+   * @param {boolean} includeKey If `true`, also matches when the asset key equals the role.
+   * @returns {Asset|null} The first matching asset, or `null` if none found.
    */
   getAssetWithRole(role, includeKey = false) {
     let assets = this.getAssetsWithRoles([role], includeKey);
@@ -290,10 +290,10 @@ class STAC extends STACHypermedia {
   }
 
   /**
+   * Returns all assets whose media type matches one of the given types.
    *
-   * @todo
-   * @param {Array.<string>} types
-   * @returns {Array.<Asset>}
+   * @param {Array.<string>} types The media types to filter by.
+   * @returns {Array.<Asset>} The matching assets.
    */
   getAssetsByTypes(types) {
     return this.getAssets().filter((asset) => isMediaType(asset.type, types));
