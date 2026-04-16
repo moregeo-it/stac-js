@@ -2,7 +2,7 @@ import { browserProtocols, toAbsolute } from './http.js';
 import { isMediaType } from './mediatypes.js';
 import { hasText, URI } from './utils.js';
 import STACObject from './object.js';
-import { browserImageTypes } from './mediatypes.js';
+import { browserImageTypes, cogMediaTypes, geotiffMediaTypes } from './mediatypes.js';
 
 /**
  * A STAC reference as base for Assets and Links.
@@ -113,6 +113,7 @@ class STACReference extends STACObject {
    * Checks whether this entity is a GeoTiff (including COGs).
    *
    * @returns {boolean} `true` is this entity is a GeoTiff, `false` otherwise.
+   * @deprecated Use `isType(geotiffMediaTypes)` instead.
    */
   get isGeoTIFF() {
     return this.isType(geotiffMediaTypes);
@@ -122,6 +123,7 @@ class STACReference extends STACObject {
    * Checks whether this entity is a COG (excluding pure GeoTiffs).
    *
    * @returns {boolean} `true` is this entity is a COG, `false` otherwise.
+   * @deprecated Use `isType(cogMediaTypes)` instead.
    */
   get isCOG() {
     return this.isType(cogMediaTypes);
