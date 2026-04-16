@@ -4,7 +4,9 @@ import Link from '../src/link';
 import Asset from '../src/asset';
 import create from '../src/index';
 
-let json = JSON.parse(fs.readFileSync('./tests/examples/item.json'));
+const loadJson = (path) => JSON.parse(fs.readFileSync(path));
+
+let json = loadJson('./tests/examples/item.json');
 let item = new Item(json);
 let bbox = [172.91, 1.34, 172.95, 1.36];
 let dtDate = new Date(Date.UTC(2020, 11, 14, 18, 2, 31));
@@ -14,15 +16,18 @@ let collectionLink = item.links.find((link) => link.rel === 'collection');
 let rootLink = item.links.find((link) => link.rel === 'root');
 let parentLink = item.links.find((link) => link.rel === 'parent');
 
-let json2 = JSON.parse(fs.readFileSync('./tests/examples/item-s2.json'));
+let json2 = loadJson('./tests/examples/item-s2.json');
 let item2 = new Item(json2);
 let dtStr2 = '2023-02-27T14:47:44Z';
 let dtDate2 = new Date(Date.UTC(2023, 1, 27, 14, 47, 44));
 
 let url = 'https://example.com/20201211_223832_CS2/item.json';
 
-let json2Old = JSON.parse(fs.readFileSync('./tests/examples/item-s2-old.json'));
+let json2Old = loadJson('./tests/examples/item-s2-old.json');
 let item2Old = create(json2Old, true, true);
+
+let jsonZarr = loadJson('./tests/examples/item-s2-eopf-zarr.json');
+let itemZarr = new Item(jsonZarr);
 
 describe('Migration', () => {
   test('stac_version', () => {
@@ -183,48 +188,75 @@ describe('links', () => {
   });
 });
 
-describe('rankGeoTIFFs', () => {
-  test('default', () => {
-    let ranks = item.rankGeoTIFFs();
+describe('rankGeoFiles', () => {
+  test('invalid type returns empty array', () => {
+    expect(item.rankGeoFiles('invalid')).toEqual([]);
+  });
+
+  test('default (geotiff)', () => {
+    let ranks = item.rankGeoFiles('geotiff');
     expect(ranks.length).toBe(3);
     expect(ranks.map((r) => r.asset.getKey())).toEqual(['visual', 'analytic', 'udm']);
     expect(ranks.map((r) => r.score)).toEqual([5, 4, 0]);
   });
 
-  test('not httpOnly', () => {
-    let ranks = item.rankGeoTIFFs(false);
+  test('default (zarr)', () => {
+    let ranks = itemZarr.rankGeoFiles('geozarr');
+    expect(ranks.length).toBe(4);
+    expect(ranks.map((r) => r.asset.getKey())).toEqual(['reflectance', 'AOT_10m', 'SCL_20m', 'WVP_10m']);
+    expect(ranks.map((r) => r.score)).toEqual([4, 1, 1, 1]);
+  });
+
+  test('not httpOnly (geotiff)', () => {
+    let ranks = item.rankGeoFiles('geotiff', false);
     expect(ranks.length).toBe(4);
     expect(ranks.map((r) => r.asset.getKey())).toEqual(['visual', 'analytic', 's3', 'udm']);
     expect(ranks.map((r) => r.score)).toEqual([5, 4, 3, 0]);
   });
 
-  test('cogOnly', () => {
-    let ranks = item.rankGeoTIFFs(true, true);
+  test('optimizedOnly (geotiff)', () => {
+    let ranks = item.rankGeoFiles('geotiff', true, true);
     expect(ranks.length).toBe(2);
     expect(ranks.map((r) => r.asset.getKey())).toEqual(['visual', 'analytic']);
     expect(ranks.map((r) => r.score)).toEqual([3, 2]);
   });
 
-  test('with different roles', () => {
-    let ranks = item.rankGeoTIFFs(true, false, { analytic: 5 });
+  test('optimizedOnly (zarr)', () => {
+    let ranks = itemZarr.rankGeoFiles('geozarr', true, true);
+    expect(ranks.length).toBe(1);
+    expect(ranks[0].asset.getKey()).toEqual('reflectance');
+    expect(ranks[0].score).toEqual(2);
+  });
+
+  test('with different roles (geotiff)', () => {
+    let ranks = item.rankGeoFiles('geotiff', true, false, { analytic: 5 });
     expect(ranks.length).toBe(3);
     expect(ranks.map((r) => r.asset.getKey())).toEqual(['analytic', 'visual', 'udm']);
     expect(ranks.map((r) => r.score)).toEqual([8, 3, 0]);
   });
 
-  test('with callback', () => {
-    let ranks = item.rankGeoTIFFs(true, false, null, (asset) => (Array.isArray(asset.bands) ? 5 : -5));
+  test('with callback (geotiff)', () => {
+    let ranks = item.rankGeoFiles('geotiff', true, false, null, (asset) => (Array.isArray(asset.bands) ? 5 : -5));
     expect(ranks.length).toBe(3);
     expect(ranks.map((r) => r.asset.getKey())).toEqual(['visual', 'analytic', 'udm']);
     expect(ranks.map((r) => r.score)).toEqual([10, 9, -5]);
   });
 
-  test('getDefaultGeoTIFF', () => {
-    let asset = item.getDefaultGeoTIFF();
+  test('getDefaultGeoFile (geotiff)', () => {
+    let asset = item.getDefaultGeoFile('geotiff');
     expect(asset).not.toBeNull();
     expect(asset.getKey()).toEqual('visual');
     expect(asset.href).toEqual('./20201211_223832_CS2.tif');
     expect(asset.getAbsoluteUrl()).toEqual('https://example.com/20201211_223832_CS2/20201211_223832_CS2.tif');
+  });
+
+  test('getDefaultGeoFile (zarr)', () => {
+    let asset = itemZarr.getDefaultGeoFile('geozarr');
+    expect(asset).not.toBeNull();
+    expect(asset.getKey()).toEqual('reflectance');
+    expect(asset.href).toEqual(
+      'https://s3.explorer.eopf.copernicus.eu/esa-zarr-sentinel-explorer-fra/tests-output/sentinel-2-l2a/S2A_MSIL2A_20260318T142851_N0512_R139_T26WME_20260318T224412.zarr/measurements/reflectance',
+    );
   });
 });
 
