@@ -1,6 +1,7 @@
 import Migrate from '@radiantearth/stac-migrate';
 import APICollection from './apicollection.js';
 import Asset from './asset.js';
+import Band from './band.js';
 import Catalog from './catalog.js';
 import CatalogLike from './cataloglike.js';
 import Collection from './collection.js';
@@ -47,6 +48,7 @@ export default function create(data, migrate = true, updateVersionNumber = false
 export {
   APICollection,
   Asset,
+  Band,
   Catalog,
   CatalogLike,
   Collection,
