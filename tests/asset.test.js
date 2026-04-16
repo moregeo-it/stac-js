@@ -247,7 +247,7 @@ test('findVisualBands', () => {
   });
 });
 
-describe('getMinMaxValues', () => {
+describe('getStatistics', () => {
   test('bands -> statistics', () => {
     let asset = new Asset(
       {
@@ -264,11 +264,11 @@ describe('getMinMaxValues', () => {
       },
       'test',
     );
-    let obj = asset.getBand(0).getMinMaxValues();
+    let obj = asset.getBand(0).getStatistics();
     expect(isObject(obj)).toBeTruthy();
     expect(obj.minimum).toBe(-5);
     expect(obj.maximum).toBe(5);
-    expect(obj.mean).not.toBeDefined();
+    expect(obj.mean).toBe(0);
 
     let asset2 = new Asset(
       {
@@ -276,11 +276,12 @@ describe('getMinMaxValues', () => {
       },
       'test',
     );
-    let obj2 = asset2.getBand(0).getMinMaxValues();
+    let obj2 = asset2.getBand(0).getStatistics();
     expect(isObject(obj2)).toBeTruthy();
     expect(obj2.minimum).toBeNull();
     expect(obj2.maximum).toBeNull();
-    expect(obj2.mean).not.toBeDefined();
+    expect(obj2.mean).toBeNull();
+    expect(obj2.stddev).toBeNull();
   });
 
   test('classification:classes', () => {
@@ -290,7 +291,7 @@ describe('getMinMaxValues', () => {
       },
       'test',
     );
-    let obj = asset.getMinMaxValues();
+    let obj = asset.getStatistics();
     expect(isObject(obj)).toBeTruthy();
     expect(obj.minimum).toBe(-1);
     expect(obj.maximum).toBe(2);
@@ -303,7 +304,7 @@ describe('getMinMaxValues', () => {
       },
       'test',
     );
-    let obj = asset.getMinMaxValues();
+    let obj = asset.getStatistics();
     expect(isObject(obj)).toBeTruthy();
     expect(obj.minimum).toBe(0);
     expect(obj.maximum).toBe(255);
@@ -316,7 +317,7 @@ describe('getMinMaxValues', () => {
       },
       'test',
     );
-    let obj = asset.getMinMaxValues();
+    let obj = asset.getStatistics();
     expect(isObject(obj)).toBeTruthy();
     expect(obj.minimum).toBe(-1);
     expect(obj.maximum).toBe(2);
@@ -324,10 +325,12 @@ describe('getMinMaxValues', () => {
 
   test('empty', () => {
     let asset = new Asset({ href: 'example.jpg' }, 'test');
-    let obj = asset.getMinMaxValues();
+    let obj = asset.getStatistics();
     expect(isObject(obj)).toBeTruthy();
     expect(obj.minimum).toBeNull();
     expect(obj.maximum).toBeNull();
+    expect(obj.mean).toBeNull();
+    expect(obj.stddev).toBeNull();
   });
 });
 

@@ -76,7 +76,7 @@ test('getMetadata', () => {
   expect(band.getMetadata('sci:doi')).toBe('10.5061/dryad.s2v81.2/27.2');
 });
 
-describe('getMinMaxValues', () => {
+describe('getStatistics', () => {
   test('bands -> statistics', () => {
     let band = new Band(
       {
@@ -89,11 +89,11 @@ describe('getMinMaxValues', () => {
       },
       'test',
     );
-    let obj = band.getMinMaxValues();
+    let obj = band.getStatistics();
     expect(isObject(obj)).toBeTruthy();
     expect(obj.minimum).toBe(-5);
     expect(obj.maximum).toBe(5);
-    expect(obj.mean).toBeUndefined();
+    expect(obj.mean).toBe(0);
   });
 
   test('classification:classes', () => {
@@ -103,7 +103,7 @@ describe('getMinMaxValues', () => {
       },
       0,
     );
-    let obj = band.getMinMaxValues();
+    let obj = band.getStatistics();
     expect(isObject(obj)).toBeTruthy();
     expect(obj.minimum).toBe(-1);
     expect(obj.maximum).toBe(2);
@@ -111,10 +111,12 @@ describe('getMinMaxValues', () => {
 
   test('empty', () => {
     let band = new Band({ name: 'b1' }, 0);
-    let obj = band.getMinMaxValues();
+    let obj = band.getStatistics();
     expect(isObject(obj)).toBeTruthy();
     expect(obj.minimum).toBeNull();
     expect(obj.maximum).toBeNull();
+    expect(obj.mean).toBeNull();
+    expect(obj.stddev).toBeNull();
   });
 });
 

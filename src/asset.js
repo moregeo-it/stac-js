@@ -1,4 +1,4 @@
-import { getMinMaxValues, getNoDataValues, hasText, isObject } from './utils.js';
+import { getStatistics, getNoDataValues, hasText, isObject } from './utils.js';
 import STACReference from './reference.js';
 import Band from './band.js';
 
@@ -188,14 +188,25 @@ class Asset extends STACReference {
   }
 
   /**
-   * Gets the reported minimum and maximum values for an asset.
+   * Gets the reported statistics for an asset.
    *
    * Searches through different extension fields in raster, classification, and file.
    *
    * @returns {Statistics}
    */
+  getStatistics() {
+    return getStatistics(this);
+  }
+
+  /**
+   * Gets the reported minimum and maximum values for an asset.
+   *
+   * @returns {Statistics}
+   * @see {getStatistics}
+   * @deprecated Use `getStatistics()` instead.
+   */
   getMinMaxValues() {
-    return getMinMaxValues(this);
+    return getStatistics(this);
   }
 
   /**

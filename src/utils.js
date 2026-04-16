@@ -25,7 +25,7 @@ export function hasText(string) {
  * Returns 0 for all other data types.
  *
  * @param {*} obj
- * @returns {integer}
+ * @returns {number} - The size of the array or object as integer, 0 for other data types.
  */
 export function size(obj) {
   if (typeof obj === 'object' && obj !== null) {
@@ -148,52 +148,81 @@ export function getMaxForDataType(str) {
 }
 
 /**
- * Gets the reported minimum and maximum values for a STAC object.
+ * Gets the reported minimum and maximum values for an asset.
+ *
+ * @param {StacObject} object
+ * @returns {Statistics}
+ * @see {getStatistics}
+ * @deprecated Use `getStatistics()` instead.
+ */
+export function getMinMaxValues(object) {
+  return getStatistics(object);
+}
+
+/**
+ * Gets the reported statistics for a STAC object.
  *
  * Searches through different extension fields in raster, classification, and file.
  *
  * @param {StacObject} object
  * @returns {Statistics}
  */
-export function getMinMaxValues(object) {
+export function getStatistics(object) {
   /**
    * Statistics
    *
    * @typedef {Object} Statistics
    * @property {number|null} minimum Minimum value
    * @property {number|null} maximum Maximum value
+   * @property {number|null} mean Mean value (optional)
+   * @property {number|null} stddev Standard deviation (optional)
    */
   const stats = {
     minimum: null,
     maximum: null,
+    mean: null,
+    stddev: null,
   };
 
-  // Checks whether the stats object is completely filled
-  const isComplete = (obj) => obj.minimum !== null && obj.maximum !== null;
+  // Checks whether the min/max stats are completely filled
+  const hasMinMax = (obj) => obj.minimum !== null && obj.maximum !== null;
 
   // data sources: raster (statistics, histogram, data_type), classification, file (values, data_type)
   const statistics = object.getMetadata('statistics');
   if (isObject(statistics)) {
-    if (typeof statistics.minimum === 'number') {
-      stats.minimum = statistics.minimum;
+    const metrics = ['minimum', 'maximum', 'mean', 'stddev'];
+    for (let key of metrics) {
+      if (typeof statistics[key] === 'number') {
+        stats[key] = statistics[key];
+      }
     }
-    if (typeof statistics.maximum === 'number') {
-      stats.maximum = statistics.maximum;
-    }
-    if (isComplete(stats)) {
+    if (hasMinMax(stats)) {
       return stats;
     }
   }
 
   const histogram = object.getMetadata('raster:histogram');
-  if (isObject(histogram)) {
-    if (typeof histogram.min === 'number') {
+  if (
+    isObject(histogram) &&
+    typeof histogram.min === 'number' &&
+    typeof histogram.max === 'number' &&
+    typeof histogram.count === 'number' &&
+    Array.isArray(histogram.buckets)
+  ) {
+    if (stats.minimum === null) {
       stats.minimum = histogram.min;
     }
-    if (typeof histogram.max === 'number') {
+    if (stats.maximum === null) {
       stats.maximum = histogram.max;
     }
-    if (isComplete(stats)) {
+    const histStats = computeHistogramStats(histogram);
+    if (stats.mean === null && histStats.mean !== null) {
+      stats.mean = histStats.mean;
+    }
+    if (stats.stddev === null && histStats.stddev !== null) {
+      stats.stddev = histStats.stddev;
+    }
+    if (hasMinMax(stats)) {
       return stats;
     }
   }
@@ -205,7 +234,7 @@ export function getMinMaxValues(object) {
       obj.maximum = Math.max(obj.maximum, cls.value);
       return obj;
     }, stats);
-    if (isComplete(stats)) {
+    if (hasMinMax(stats)) {
       return stats;
     }
   }
@@ -217,7 +246,7 @@ export function getMinMaxValues(object) {
       obj.maximum = Math.max(obj.maximum, ...map.values);
       return obj;
     }, stats);
-    if (isComplete(stats)) {
+    if (hasMinMax(stats)) {
       return stats;
     }
   }
@@ -229,6 +258,52 @@ export function getMinMaxValues(object) {
   }
 
   return stats;
+}
+
+/**
+ * Computed histogram statistics.
+ *
+ * @typedef {Object} HistogramStats
+ * @property {number|null} mean Mean value
+ * @property {number|null} stddev Standard deviation
+ */
+
+/**
+ * Computes mean and standard deviation from a raster histogram object.
+ *
+ * The histogram must have `min`, `max`, `count`, and `buckets` fields.
+ * Bucket width is computed as `(max - min) / count` and each bucket center
+ * is used as a representative value for the weighted calculations.
+ *
+ * @param {Object} histogram The raster histogram object.
+ * @param {number} histogram.min Minimum value of the distribution.
+ * @param {number} histogram.max Maximum value of the distribution.
+ * @param {number} histogram.count Number of buckets.
+ * @param {Array.<number>} histogram.buckets Pixel counts per bucket.
+ * @returns {HistogramStats} The computed mean and standard deviation, or null if not computable.
+ */
+export function computeHistogramStats(histogram) {
+  const bucketWidth = (histogram.max - histogram.min) / histogram.count;
+  let totalCount = 0;
+  let weightedSum = 0;
+  for (let i = 0; i < histogram.buckets.length; i++) {
+    const bucketCenter = histogram.min + (i + 0.5) * bucketWidth;
+    const count = histogram.buckets[i];
+    totalCount += count;
+    weightedSum += bucketCenter * count;
+  }
+  if (totalCount === 0) {
+    return { mean: null, stddev: null };
+  }
+  const mean = weightedSum / totalCount;
+  let weightedSqSum = 0;
+  for (let i = 0; i < histogram.buckets.length; i++) {
+    const bucketCenter = histogram.min + (i + 0.5) * bucketWidth;
+    const diff = bucketCenter - mean;
+    weightedSqSum += diff * diff * histogram.buckets[i];
+  }
+  const stddev = Math.sqrt(weightedSqSum / totalCount);
+  return { mean, stddev };
 }
 
 /**

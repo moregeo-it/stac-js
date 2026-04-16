@@ -1,4 +1,4 @@
-import { getMinMaxValues, getNoDataValues } from './utils.js';
+import { getStatistics, getNoDataValues } from './utils.js';
 import STACObject from './object.js';
 
 /**
@@ -80,14 +80,25 @@ class Band extends STACObject {
   }
 
   /**
-   * Gets the reported minimum and maximum values for a band.
+   * Gets the reported statistics for a band.
    *
    * Searches through different extension fields in raster, classification, and file.
    *
    * @returns {Statistics}
    */
+  getStatistics() {
+    return getStatistics(this);
+  }
+
+  /**
+   * Gets the reported minimum and maximum values for a band.
+   *
+   * @returns {Statistics}
+   * @see {getStatistics}
+   * @deprecated Use `getStatistics()` instead.
+   */
   getMinMaxValues() {
-    return getMinMaxValues(this);
+    return getStatistics(this);
   }
 
   /**
