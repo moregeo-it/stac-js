@@ -1,9 +1,7 @@
 import Asset from './asset.js';
 import Band from './band.js';
 import CatalogLike from './cataloglike.js';
-import { isoToDate } from './datetime.js';
-import { ensureBoundingBox, toGeoJSON } from './geo.js';
-import { hasText, isObject } from './utils.js';
+import { isObject } from './utils.js';
 
 /**
  * Extents
@@ -55,87 +53,6 @@ class Collection extends CatalogLike {
       item_assets: Asset.fromAssets,
     };
     super(data, absoluteUrl, keyMap);
-  }
-
-  /**
-   * Returns a GeoJSON Feature for this STAC Collection.
-   *
-   * The Feature contains a Polygon or MultiPolygon based on the given number of valid bounding boxes.
-   *
-   * @returns {Object|null} GeoJSON object or `null`
-   */
-  toGeoJSON() {
-    let geojson = toGeoJSON(this.getBoundingBoxes());
-    if (geojson) {
-      geojson.id = this.id;
-    }
-    return geojson;
-  }
-
-  /**
-   * Returns a single union 2D bounding box for the whole collection.
-   *
-   * @returns {BoundingBox|null}
-   */
-  getBoundingBox() {
-    let bboxes = this.getRawBoundingBoxes();
-    if (bboxes.length > 0) {
-      return ensureBoundingBox(bboxes[0]);
-    }
-    return null;
-  }
-
-  /**
-   * Returns the individual 2D bounding boxes for the collection,
-   * without the union bounding box if multiple bounding boxes are given.
-   *
-   * @returns {Array.<BoundingBox>}
-   */
-  getBoundingBoxes() {
-    let raw = this.getRawBoundingBoxes();
-    if (raw.length === 1) {
-      return [ensureBoundingBox(raw[0])];
-    } else if (raw.length > 1) {
-      return raw.slice(1).map(ensureBoundingBox);
-    }
-    return null;
-  }
-
-  /**
-   * Returns all bounding boxes from the collection, including the union bounding box.
-   *
-   * @returns {Array.<BoundingBox>}
-   */
-  getRawBoundingBoxes() {
-    let extents = this.extent?.spatial?.bbox;
-    if (Array.isArray(extents) && extents.length > 0) {
-      return extents;
-    }
-    return [];
-  }
-
-  /**
-   * Returns a single temporal extent for the STAC Collection.
-   *
-   * @returns {Array.<Date|null>|null}
-   */
-  getTemporalExtent() {
-    return this.getTemporalExtents()[0] || null;
-  }
-
-  /**
-   * Returns the temporal extent(s) for the STAC Collection.
-   *
-   * @returns {Array.<Array.<Date|null>>}
-   */
-  getTemporalExtents() {
-    let extents = this.extent?.temporal?.interval;
-    if (Array.isArray(extents) && extents.length > 0) {
-      return extents
-        .filter((extent) => Array.isArray(extent) && (hasText(extent[0]) || hasText(extent[1])))
-        .map((interval) => interval.map((datetime) => isoToDate(datetime)));
-    }
-    return [];
   }
 
   /**

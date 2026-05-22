@@ -1,10 +1,16 @@
 import STAC from './stac.js';
+import { isoToDate } from './datetime.js';
+import { ensureBoundingBox, toGeoJSON } from './geo.js';
 import { geojsonMediaType, isMediaType } from './mediatypes.js';
 import { hasText } from './utils.js';
 import { queryables, sortables } from './relationtypes.js';
 
 /**
  * Class for common parts of Catalogs and Collections.
+ *
+ * Note that we implement getBoundingBox and getTemporalExtent here, although not defined for STAC catalogs.
+ * This allows us to read those entities from the root catalog, if provided.
+ * In case they are not provided, the methods will just return `null` as usual.
  *
  * Don't instantiate this class!
  *
@@ -26,6 +32,87 @@ class CatalogLike extends STAC {
    */
   getObjectType() {
     return this.type;
+  }
+
+  /**
+   * Returns a GeoJSON Feature for this STAC Collection.
+   *
+   * The Feature contains a Polygon or MultiPolygon based on the given number of valid bounding boxes.
+   *
+   * @returns {Object|null} GeoJSON object or `null`
+   */
+  toGeoJSON() {
+    let geojson = toGeoJSON(this.getBoundingBoxes());
+    if (geojson) {
+      geojson.id = this.id;
+    }
+    return geojson;
+  }
+
+  /**
+   * Returns a single union 2D bounding box for the whole collection.
+   *
+   * @returns {BoundingBox|null}
+   */
+  getBoundingBox() {
+    let bboxes = this.getRawBoundingBoxes();
+    if (bboxes.length > 0) {
+      return ensureBoundingBox(bboxes[0]);
+    }
+    return null;
+  }
+
+  /**
+   * Returns the individual 2D bounding boxes for the collection,
+   * without the union bounding box if multiple bounding boxes are given.
+   *
+   * @returns {Array.<BoundingBox>}
+   */
+  getBoundingBoxes() {
+    let raw = this.getRawBoundingBoxes();
+    if (raw.length === 1) {
+      return [ensureBoundingBox(raw[0])];
+    } else if (raw.length > 1) {
+      return raw.slice(1).map(ensureBoundingBox);
+    }
+    return [];
+  }
+
+  /**
+   * Returns all bounding boxes from the collection, including the union bounding box.
+   *
+   * @returns {Array.<BoundingBox>}
+   */
+  getRawBoundingBoxes() {
+    let extents = this.extent?.spatial?.bbox;
+    if (Array.isArray(extents) && extents.length > 0) {
+      return extents;
+    }
+    return [];
+  }
+
+  /**
+   * Returns a single temporal extent for the STAC Collection.
+   *
+   * @returns {Array.<Date|null>|null}
+   */
+  getTemporalExtent() {
+    return this.getTemporalExtents()[0] || null;
+  }
+
+  /**
+   * Returns the temporal extent(s) for the STAC Collection.
+   *
+   * @returns {Array.<Array.<Date|null>>}
+   */
+  getTemporalExtents() {
+    const extents = this.extent?.temporal?.interval;
+    if (Array.isArray(extents) && extents.length > 0) {
+      return extents
+        .filter((extent) => Array.isArray(extent) && (hasText(extent[0]) || hasText(extent[1])))
+        .map((interval) => interval.map((datetime) => isoToDate(datetime)));
+    }
+    return [];
   }
 
   /**
