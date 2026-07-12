@@ -82,6 +82,12 @@ class STAC extends STACHypermedia {
   /**
    * Get the thumbnails from the assets and links in a STAC entity.
    *
+   * If `browserOnly` is enabled and an asset can't be shown in a browser
+   * (e.g. it is not served over HTTP/S), its alternate assets are checked and
+   * the first alternate asset that a browser can show is returned instead.
+   * Such an asset is merged with the metadata of its parent asset (see
+   * `Asset.fillAlternate`) and `getContext()` returns the parent asset.
+   *
    * @param {boolean} browserOnly - Return only images that can be shown in a browser natively (PNG/JPG/GIF/WEBP + HTTP/S).
    * @param {string|null} prefer - If not `null` (default), prefers a role over the other. Either `thumbnail` or `overview`.
    * @param {boolean} includeGraphic - Also include assets with the role `graphic`.
@@ -103,8 +109,19 @@ class STAC extends STACHypermedia {
       }
     }
     if (browserOnly) {
-      // Remove all images that can't be displayed in a browser
-      thumbnails = thumbnails.filter((img) => img.canBrowserDisplayImage());
+      // Replace all images that can't be displayed in a browser with a
+      // browser-displayable alternate asset (if available), remove them otherwise.
+      // See https://github.com/radiantearth/stac-browser/issues/910
+      thumbnails = thumbnails
+        .map((img) => {
+          if (img.canBrowserDisplayImage()) {
+            return img;
+          } else if (img.isAsset) {
+            return img.getAlternates(true).find((alt) => alt.canBrowserDisplayImage()) || null;
+          }
+          return null;
+        })
+        .filter((img) => img !== null);
     }
     if (prefer && thumbnails.length > 1) {
       // Prefer one role over the other.
@@ -163,6 +180,12 @@ class STAC extends STACHypermedia {
    *   - has RGB bands: +1
    *   - additionalCriteria: +/- a custom value
    *
+   * If `httpOnly` is enabled and an asset can't be accessed via HTTP(S),
+   * its alternate assets are checked and the first suitable alternate asset
+   * is ranked instead. Such an asset is merged with the metadata of its
+   * parent asset (see `Asset.fillAlternate`) and `getContext()` returns the
+   * parent asset.
+   *
    * @param {string} type The file type to rank for, either `geotiff` or `geozarr`.
    * @param {boolean} httpOnly Return only GeoTiffs that can be accessed via HTTP(S)
    * @param {boolean} optimizedOnly Return only optimized files (COG/WOZ)
@@ -193,8 +216,18 @@ class STAC extends STACHypermedia {
     let scores = [];
     let assets = this.getAssetsByTypes(mediaTypes[type]);
     if (httpOnly) {
-      // todo: This doesn't cater for cases where e.g. S3 is the main asset and the HTTP asset is the alternate asset.
-      assets = assets.filter((asset) => asset.isHTTP && (!optimizedOnly || asset.isType(optimizedTypes[type])));
+      const isUsable = (asset) => asset.isHTTP && (!optimizedOnly || asset.isType(optimizedTypes[type]));
+      // Replace all assets that can't be accessed via HTTP(S) with a
+      // suitable alternate asset (if available), remove them otherwise.
+      // See https://github.com/radiantearth/stac-browser/issues/910
+      assets = assets
+        .map((asset) => {
+          if (isUsable(asset)) {
+            return asset;
+          }
+          return asset.getAlternates(true).find(isUsable) || null;
+        })
+        .filter((asset) => asset !== null);
     }
     let roles = Object.entries(roleScores);
     for (let asset of assets) {

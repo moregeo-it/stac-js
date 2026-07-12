@@ -282,6 +282,25 @@ class Asset extends STACReference {
   }
 
   /**
+   * Returns the alternate assets of this asset.
+   *
+   * Returns an empty array if no alternate assets are present,
+   * e.g. for alternate assets themselves.
+   *
+   * @param {boolean} merged If `true`, the parent asset's metadata is merged
+   * into the alternate assets (see `fillAlternate`).
+   * @returns {Array.<Asset>} The alternate assets
+   * @see {fillAlternate}
+   */
+  getAlternates(merged = false) {
+    if (!isObject(this.alternate)) {
+      return [];
+    }
+    const alternates = Object.values(this.alternate).filter((asset) => asset instanceof Asset);
+    return merged ? alternates.map((asset) => asset.fillAlternate()) : alternates;
+  }
+
+  /**
    * Returns the full merged metadata for an alternate asset.
    *
    * The result contains all properties from the parent asset merged with
