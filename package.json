@@ -41,6 +41,11 @@
   },
   "dependencies": {
     "@radiantearth/stac-migrate": "^2.0.2",
+    "@turf/boolean-clockwise": "^7.2.0",
+    "@turf/boolean-contains": "^7.2.0",
+    "@turf/centroid": "^7.2.0",
+    "@turf/helpers": "^7.2.0",
+    "@turf/rewind": "^7.2.0",
     "urijs": "^1.19.11"
   }
 }

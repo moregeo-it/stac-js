@@ -198,9 +198,11 @@ class STACObject {
   /**
    * Returns a GeoJSON Feature or FeatureCollection for this STAC object.
    *
+   * @param {boolean|FixOptions} fixAntimeridian If set to `true` or an options object, geometries that cross the antimeridian are fixed (split into multi-geometries).
    * @returns {Object|null} GeoJSON object or `null`
    */
-  toGeoJSON() {
+  toGeoJSON(fixAntimeridian = false) {
+    // eslint-disable-line no-unused-vars
     return null;
   }
 

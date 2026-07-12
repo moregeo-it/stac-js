@@ -1,5 +1,5 @@
 import { unionDateTime } from './datetime.js';
-import { unionBoundingBox } from './geo.js';
+import { applyAntimeridianFix, unionBoundingBox } from './geo.js';
 import { isObject } from './utils.js';
 import Item from './item.js';
 import APICollection from './apicollection.js';
@@ -54,10 +54,11 @@ class ItemCollection extends APICollection {
   /**
    * Returns a GeoJSON FeatureCollection for this STAC object.
    *
+   * @param {boolean|FixOptions} fixAntimeridian If set to `true` or an options object, geometries that cross the antimeridian are fixed (split into multi-geometries).
    * @returns {Object|null} GeoJSON object or `null`
    */
-  toGeoJSON() {
-    return this.toJSON();
+  toGeoJSON(fixAntimeridian = false) {
+    return applyAntimeridianFix(this.toJSON(), fixAntimeridian);
   }
 
   /**
