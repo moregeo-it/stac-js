@@ -141,6 +141,23 @@ describe('alternate assets', () => {
     expect(altAsset.isPreview).toBeFalsy();
   });
 
+  test('getAlternates', () => {
+    let alternates = cdseAsset.getAlternates();
+    expect(alternates.length).toBe(1);
+    expect(alternates[0]).toBe(altAsset);
+
+    // Merged with the metadata of the parent asset
+    let merged = cdseAsset.getAlternates(true);
+    expect(merged.length).toBe(1);
+    expect(merged[0].href).toBe(altAsset.href);
+    expect(merged[0].type).toBe('image/jp2');
+    expect(merged[0]['alternate:name']).toBe('S3');
+
+    // No alternates
+    expect(asset.getAlternates()).toEqual([]);
+    expect(altAsset.getAlternates()).toEqual([]);
+  });
+
   test('fillAlternate', () => {
     let merged = altAsset.fillAlternate();
     expect(merged instanceof Asset).toBeTruthy();

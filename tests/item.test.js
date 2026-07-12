@@ -143,6 +143,63 @@ test('getAsset', () => {
   expect(item.getAsset('thumbnail')).toEqual(new Asset(json.assets.thumbnail, 'thumbnail', item));
 });
 
+describe('getThumbnails with alternate assets', () => {
+  // see https://github.com/radiantearth/stac-browser/issues/910
+  const s3Json = {
+    stac_version: '1.1.0',
+    type: 'Feature',
+    id: 'alternate-thumbnail',
+    geometry: null,
+    properties: { datetime: '2024-01-01T00:00:00Z' },
+    links: [{ rel: 'self', href: 'https://example.com/item.json', type: 'application/geo+json' }],
+    assets: {
+      thumbnail: {
+        href: 's3://bucket/thumbnail.png',
+        type: 'image/png',
+        title: 'Thumbnail',
+        roles: ['thumbnail'],
+        'alternate:name': 'S3',
+        alternate: {
+          https: {
+            href: 'https://example.com/thumbnail.png',
+            'alternate:name': 'HTTPS',
+          },
+        },
+      },
+    },
+  };
+
+  test('replaces a non-displayable asset with a displayable alternate', () => {
+    const item = new Item(structuredClone(s3Json));
+    const thumbnails = item.getThumbnails(true);
+    expect(thumbnails.length).toBe(1);
+    const thumbnail = thumbnails[0];
+    expect(thumbnail.getAbsoluteUrl()).toBe('https://example.com/thumbnail.png');
+    expect(thumbnail.canBrowserDisplayImage()).toBeTruthy();
+    // Metadata is merged from the parent asset
+    expect(thumbnail.type).toBe('image/png');
+    expect(thumbnail.title).toBe('Thumbnail');
+    expect(thumbnail['alternate:name']).toBe('HTTPS');
+    // The parent asset is available as context
+    expect(thumbnail.getContext()).toBe(item.getAsset('thumbnail'));
+  });
+
+  test('returns the original asset if browserOnly is disabled', () => {
+    const item = new Item(structuredClone(s3Json));
+    const thumbnails = item.getThumbnails(false);
+    expect(thumbnails.length).toBe(1);
+    expect(thumbnails[0].getAbsoluteUrl()).toBe('s3://bucket/thumbnail.png');
+  });
+
+  test('removes assets without a displayable alternate', () => {
+    const clone = structuredClone(s3Json);
+    clone.assets.thumbnail.alternate.https.href = 'ftp://example.com/thumbnail.png';
+    const item = new Item(clone);
+    expect(item.getThumbnails(true)).toEqual([]);
+    expect(item.getThumbnails(false).length).toBe(1);
+  });
+});
+
 test('getAssets', () => {
   expect(item.getAssets()).toEqual(Object.values(item.assets));
 });
@@ -240,6 +297,26 @@ describe('rankGeoFiles', () => {
     expect(ranks.length).toBe(3);
     expect(ranks.map((r) => r.asset.getKey())).toEqual(['visual', 'analytic', 'udm']);
     expect(ranks.map((r) => r.score)).toEqual([10, 9, -5]);
+  });
+
+  test('httpOnly with alternate assets (geotiff)', () => {
+    // see https://github.com/radiantearth/stac-browser/issues/910
+    const clone = structuredClone(json);
+    clone.assets.s3.alternate = {
+      https: { href: 'https://example.com/s3-alternate.tif', 'alternate:name': 'HTTPS' },
+    };
+    const altItem = new Item(clone);
+    let ranks = altItem.rankGeoFiles('geotiff');
+    expect(ranks.length).toBe(4);
+    expect(ranks.map((r) => r.asset.getKey())).toEqual(['visual', 'analytic', 'https', 'udm']);
+    expect(ranks.map((r) => r.score)).toEqual([5, 4, 3, 0]);
+    // The alternate asset is merged with the metadata of the original asset
+    const alternate = ranks[2].asset;
+    expect(alternate.getAbsoluteUrl()).toBe('https://example.com/s3-alternate.tif');
+    expect(alternate.isHTTP).toBeTruthy();
+    expect(alternate.type).toBe(clone.assets.s3.type);
+    expect(alternate.title).toBe(clone.assets.s3.title);
+    expect(alternate.getContext()).toBe(altItem.getAsset('s3'));
   });
 
   test('getDefaultGeoFile (geotiff)', () => {
