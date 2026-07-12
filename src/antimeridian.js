@@ -13,12 +13,19 @@ import { rewind } from '@turf/rewind';
  * which itself is a port of the Python antimeridian package by Pete Gadomski
  * (https://github.com/gadomski/antimeridian).
  *
- * Deviations from antimeridian-ts:
+ * Deviations from antimeridian-ts (all in favor of the Python implementation):
  * - Rings of polygons that were split at the antimeridian are properly closed
  *   (first position === last position) as required by the GeoJSON specification.
  * - Geometry types that can't cross the antimeridian (e.g. Point and MultiPoint)
  *   and Features without a geometry are returned unchanged instead of throwing an error.
  * - GeometryCollections are supported by fixing each geometry individually.
+ * - Unclosed input rings are closed and consecutive (near-)duplicate positions are
+ *   removed before processing, like shapely does in the Python implementation.
+ * - The interpolation in `crossingLatitudeFlat` and the joining of split segments
+ *   in `buildPolygons` are fixed to match the Python implementation.
+ * - The centroid is area-weighted (as in shapely) instead of a mean of the vertices.
+ * - Multiple holes in the same polygon are all preserved (the Python implementation
+ *   in fact drops all but the last hole per polygon).
  *
  * @module antimeridian
  */
@@ -36,6 +43,69 @@ import { rewind } from '@turf/rewind';
 
 const R2D = 180 / Math.PI;
 const D2R = Math.PI / 180;
+
+/**
+ * Checks whether two numbers are close to each other,
+ * like `math.isclose` in Python (relative tolerance of 1e-9).
+ *
+ * @private
+ * @param {number} a First number
+ * @param {number} b Second number
+ * @returns {boolean} `true` if the numbers are close, `false` otherwise.
+ */
+function isClose(a, b) {
+  return Math.abs(a - b) <= 1e-9 * Math.max(Math.abs(a), Math.abs(b));
+}
+
+/**
+ * Checks whether two numbers are close to each other,
+ * like `numpy.isclose` in Python (relative tolerance of 1e-5, absolute tolerance of 1e-8).
+ *
+ * @private
+ * @param {number} a First number
+ * @param {number} b Second number
+ * @returns {boolean} `true` if the numbers are close, `false` otherwise.
+ */
+function isCloseLoose(a, b) {
+  return Math.abs(a - b) <= 1e-8 + 1e-5 * Math.abs(b);
+}
+
+/**
+ * Closes a ring if it is not closed yet.
+ *
+ * @private
+ * @param {Array.<Array.<number>>} ring A ring (list of positions).
+ * @returns {Array.<Array.<number>>} The closed ring.
+ */
+function closeRing(ring) {
+  const first = ring[0];
+  const last = ring[ring.length - 1];
+  if (first[0] !== last[0] || first[1] !== last[1]) {
+    return [...ring, [first[0], first[1]]];
+  }
+  return ring;
+}
+
+/**
+ * Removes consecutive near-duplicate positions from a list of positions.
+ *
+ * @private
+ * @param {Array.<Array.<number>>} coords A list of positions.
+ * @returns {Array.<Array.<number>>} The list of positions without consecutive near-duplicates.
+ */
+function removeConsecutiveDuplicates(coords) {
+  if (coords.length < 2) {
+    return coords;
+  }
+  const result = [coords[0]];
+  for (let i = 1; i < coords.length; i++) {
+    const prev = result[result.length - 1];
+    if (!isCloseLoose(coords[i][0], prev[0]) || !isCloseLoose(coords[i][1], prev[1])) {
+      result.push(coords[i]);
+    }
+  }
+  return result;
+}
 
 /**
  * Converts a lon/lat position to a cartesian vector on the unit sphere.
@@ -277,12 +347,13 @@ function fixPolygon(poly, options) {
 function fixPolygonToList(poly, options) {
   const { forceNorthPole = false, forceSouthPole = false, fixWinding = true, greatCircle = true } = options;
 
-  const exterior = normalize(poly.coordinates[0]);
+  const exterior = removeConsecutiveDuplicates(normalize(closeRing(poly.coordinates[0])));
+  const interiorRings = poly.coordinates.slice(1).map(closeRing);
   let segments = segment(exterior, greatCircle);
 
   // Case 1: No crossing
   if (segments.length === 0) {
-    const polyObj = polygon([exterior, ...poly.coordinates.slice(1)]);
+    const polyObj = polygon([exterior, ...interiorRings]);
 
     // Check winding of the exterior (should be counter-clockwise)
     const exteriorIsCW = booleanClockwise(polyObj.geometry.coordinates[0]);
@@ -297,8 +368,7 @@ function fixPolygonToList(poly, options) {
 
   // Case 2: Crossing occurred
   const interiors = [];
-  for (let i = 1; i < poly.coordinates.length; i++) {
-    const interior = poly.coordinates[i];
+  for (const interior of interiorRings) {
     const interiorSegments = segment(interior, greatCircle);
 
     if (interiorSegments.length > 0) {
@@ -437,16 +507,17 @@ function segmentShape(geom, greatCircle) {
  * @returns {Array.<Array.<Array.<number>>>} A list of segments (lists of positions).
  */
 function segmentPolygon(poly, greatCircle) {
-  let segments = segment(poly.coordinates[0], greatCircle);
+  const rings = poly.coordinates.map(closeRing);
+  let segments = segment(rings[0], greatCircle);
   if (segments.length === 0) {
-    segments = [poly.coordinates[0]];
+    segments = [rings[0]];
   }
-  for (let i = 1; i < poly.coordinates.length; i++) {
-    const interiorSegments = segment(poly.coordinates[i], greatCircle);
+  for (let i = 1; i < rings.length; i++) {
+    const interiorSegments = segment(rings[i], greatCircle);
     if (interiorSegments.length > 0) {
       segments.push(...interiorSegments);
     } else {
-      segments.push(poly.coordinates[i]);
+      segments.push(rings[i]);
     }
   }
   return segments;
@@ -468,22 +539,26 @@ function normalize(coords) {
   for (let i = 0; i < coords.length; i++) {
     const [lon, lat] = coords[i];
 
-    if (Math.abs(lon - 180) < 1e-9) {
+    if (isClose(lon, 180)) {
       const prev = newCoords[(i - 1 + coords.length) % coords.length];
-      if (Math.abs(lat) !== 90 && Math.abs(prev[0] - -180) < 1e-9) {
+      if (Math.abs(lat) !== 90 && isCloseLoose(prev[0], -180)) {
         newCoords[i] = [-180, lat];
       } else {
         newCoords[i] = [180, lat];
       }
-    } else if (Math.abs(lon - -180) < 1e-9) {
+    } else if (isClose(lon, -180)) {
       const prev = newCoords[(i - 1 + coords.length) % coords.length];
-      if (Math.abs(lat) !== 90 && Math.abs(prev[0] - 180) < 1e-9) {
+      if (Math.abs(lat) !== 90 && isCloseLoose(prev[0], 180)) {
         newCoords[i] = [180, lat];
       } else {
         newCoords[i] = [-180, lat];
       }
     } else {
-      newCoords[i] = [((((lon + 180) % 360) + 360) % 360) - 180, lat];
+      let normalized = (lon + 180) % 360;
+      if (normalized < 0) {
+        normalized += 360;
+      }
+      newCoords[i] = [normalized - 180, lat];
       allOnAntimeridian = false;
     }
   }
@@ -501,6 +576,7 @@ function normalize(coords) {
  * @returns {Array.<Array.<Array.<number>>>} A list of segments (lists of positions).
  */
 function segment(coords, greatCircle) {
+  coords = removeConsecutiveDuplicates(coords);
   let currentSegment = [];
   const segments = [];
 
@@ -589,7 +665,7 @@ function crossingLatitudeGreatCircle(start, end) {
  */
 function crossingLatitudeFlat(start, end) {
   const latDelta = end[1] - start[1];
-  if (end[0] > 0) {
+  if (end[0] < 0) {
     return Number((start[1] + ((180.0 - start[0]) * latDelta) / (end[0] + 360.0 - start[0])).toFixed(7));
   } else {
     return Number((start[1] + ((start[0] + 180.0) * latDelta) / (start[0] + 360.0 - end[0])).toFixed(7));
@@ -682,10 +758,19 @@ function buildPolygons(segments) {
   const isRight = segEnd[0] === 180;
 
   const candidates = [];
-
+  if (isSelfClosing(seg)) {
+    // Self-closing segments might end up joining up with themselves,
+    // but they might not (e.g. donuts).
+    candidates.push({ index: null, latitude: seg[0][1] });
+  }
   for (let i = 0; i < segments.length; i++) {
     const s = segments[i];
+    // Is the start of s on the same side as the end of the segment?
     if (s[0][0] === segEnd[0]) {
+      // If so, check the following:
+      // - Is the start of s closer to the pole than the end of the segment, and
+      // - is the end of s on the other side, or
+      // - is the end of s further away from the pole than the start of the segment (e.g. donuts)?
       if (
         (isRight && s[0][1] > segEnd[1] && (!isSelfClosing(s) || s[s.length - 1][1] < seg[0][1])) ||
         (!isRight && s[0][1] < segEnd[1] && (!isSelfClosing(s) || s[s.length - 1][1] > seg[0][1]))
@@ -695,10 +780,11 @@ function buildPolygons(segments) {
     }
   }
 
-  candidates.sort((a, b) => (isRight ? b.latitude - a.latitude : a.latitude - b.latitude));
+  // Sort the candidates so the closest point comes first in the list.
+  candidates.sort((a, b) => (isRight ? a.latitude - b.latitude : b.latitude - a.latitude));
+  const index = candidates.length > 0 ? candidates[0].index : null;
 
-  if (candidates.length > 0) {
-    const index = candidates[0].index;
+  if (index !== null) {
     const nextSeg = segments.splice(index, 1)[0];
     seg = seg.concat(nextSeg);
     segments.push(seg);
@@ -842,6 +928,9 @@ function isCoincidentToAntimeridian(ring) {
  * Handles the antimeridian by calculating the centroid from an identical
  * MultiPolygon with longitudes in [0, 360).
  *
+ * The centroid is area-weighted (as in shapely, which the Python
+ * implementation uses), not the mean of the vertices.
+ *
  * @param {Object} shape The GeoJSON Feature or Geometry.
  * @returns {Point} The centroid ([longitude, latitude]).
  */
@@ -851,7 +940,9 @@ export function centroid(shape) {
     throw new Error('Invalid geometry');
   }
 
-  if (geom.type === 'MultiPolygon') {
+  if (geom.type === 'Polygon') {
+    return polygonCentroid([geom.coordinates]);
+  } else if (geom.type === 'MultiPolygon') {
     // Shift any polygon with negative longitudes by +360 to make the shape
     // contiguous in the [0, 360) range, calculate the centroid, then shift back.
     const shiftedCoords = geom.coordinates.map((polyCoords) => {
@@ -864,12 +955,7 @@ export function centroid(shape) {
       }
     });
 
-    const shifted = {
-      type: 'MultiPolygon',
-      coordinates: shiftedCoords,
-    };
-
-    let [x, y] = turfCentroid(shifted).geometry.coordinates;
+    let [x, y] = polygonCentroid(shiftedCoords);
 
     // Normalize back to [-180, 180]
     if (x > 180) {
@@ -879,4 +965,44 @@ export function centroid(shape) {
   } else {
     return turfCentroid(geom).geometry.coordinates;
   }
+}
+
+/**
+ * Calculates the area-weighted centroid for a list of polygons
+ * (each a list of rings, i.e. MultiPolygon coordinates).
+ *
+ * @private
+ * @param {Array.<Array.<Array.<Array.<number>>>>} polygons MultiPolygon coordinates.
+ * @returns {Point} The centroid ([longitude, latitude]).
+ */
+function polygonCentroid(polygons) {
+  const acc = { area: 0, x: 0, y: 0 };
+  for (const rings of polygons) {
+    rings.forEach((ring, i) => {
+      const closed = closeRing(ring);
+      // Shoelace formula: twice the signed area and
+      // the (not yet normalized) centroid of a single ring
+      let area = 0;
+      let x = 0;
+      let y = 0;
+      for (let j = 0; j < closed.length - 1; j++) {
+        const [x1, y1] = closed[j];
+        const [x2, y2] = closed[j + 1];
+        const cross = x1 * y2 - x2 * y1;
+        area += cross;
+        x += (x1 + x2) * cross;
+        y += (y1 + y2) * cross;
+      }
+      // Add exteriors and subtract holes, independent of their winding order
+      const factor = (i === 0 ? 1 : -1) * Math.sign(area || 1);
+      acc.area += factor * area;
+      acc.x += factor * x;
+      acc.y += factor * y;
+    });
+  }
+  if (acc.area === 0) {
+    // Degenerate polygons: fall back to the mean of the vertices
+    return turfCentroid({ type: 'MultiPolygon', coordinates: polygons }).geometry.coordinates;
+  }
+  return [acc.x / (3 * acc.area), acc.y / (3 * acc.area)];
 }
