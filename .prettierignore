@@ -2,3 +2,4 @@ dist
 coverage
 docs
 tests/examples
+tests/antimeridian

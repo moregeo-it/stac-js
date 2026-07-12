@@ -1,4 +1,21 @@
+import { fixGeoJson as fixAntimeridianGeoJson } from './antimeridian.js';
 import { ensureNumber, isObject } from './utils.js';
+
+/**
+ * Applies the antimeridian fix to a GeoJSON object if requested.
+ *
+ * @private
+ * @param {Object} geojson The GeoJSON object.
+ * @param {boolean|FixOptions} fixAntimeridian If set to `true` or an options object, geometries that cross the antimeridian are fixed (split into multi-geometries).
+ * @returns {Object} The (fixed) GeoJSON object.
+ * @see {@link module:antimeridian~fixGeoJson}
+ */
+export function applyAntimeridianFix(geojson, fixAntimeridian) {
+  if (fixAntimeridian && isObject(geojson)) {
+    return fixAntimeridianGeoJson(geojson, fixAntimeridian === true ? {} : fixAntimeridian);
+  }
+  return geojson;
+}
 
 function toObject(bbox) {
   let hasZ = bbox.length >= 6;
@@ -100,9 +117,10 @@ export function fixGeoJson(geojson) {
  * The Feature contains a Polygon or MultiPolygon based on the given number of valid bounding boxes.
  *
  * @param {BoundingBox|Array.<BoundingBox>} bboxes
+ * @param {boolean|FixOptions} fixAntimeridian If set to `true` or an options object, geometries that cross the antimeridian are fixed (split into multi-geometries).
  * @returns {Object|null}
  */
-export function toGeoJSON(bboxes) {
+export function toGeoJSON(bboxes, fixAntimeridian = false) {
   if (bboxes.every((c) => typeof c === 'number')) {
     // Wrap a single bounding box into an array
     bboxes = [bboxes];
@@ -144,11 +162,12 @@ export function toGeoJSON(bboxes) {
     };
   }
   if (geometry) {
-    return {
+    const feature = {
       type: 'Feature',
       geometry,
       properties: {},
     };
+    return applyAntimeridianFix(feature, fixAntimeridian);
   }
 }
 

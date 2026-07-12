@@ -1,6 +1,6 @@
 import Asset from './asset.js';
 import { centerDateTime, isoToDate } from './datetime.js';
-import { ensureBoundingBox } from './geo.js';
+import { applyAntimeridianFix, ensureBoundingBox } from './geo.js';
 import { hasText } from './utils.js';
 import STAC from './stac.js';
 import Band from './band.js';
@@ -49,10 +49,11 @@ class Item extends STAC {
   /**
    * Returns a GeoJSON Feature for this STAC object.
    *
+   * @param {boolean|FixOptions} fixAntimeridian If set to `true` or an options object, geometries that cross the antimeridian are fixed (split into multi-geometries).
    * @returns {Object|null} GeoJSON object or `null`
    */
-  toGeoJSON() {
-    return this.toJSON();
+  toGeoJSON(fixAntimeridian = false) {
+    return applyAntimeridianFix(this.toJSON(), fixAntimeridian);
   }
 
   /**
