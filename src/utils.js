@@ -48,7 +48,7 @@ export function size(obj) {
  * @returns {number|null}
  */
 export function ensureNumber(num, min, max, delta = 0.00000001) {
-  if (typeof num !== 'number') {
+  if (!Number.isFinite(num)) {
     return null;
   }
   const min2 = min - delta;

@@ -172,9 +172,39 @@ export function toGeoJSON(bboxes, fixAntimeridian = false) {
 }
 
 /**
+ * Ensures a longitude is within [-180, 180].
+ *
+ * Longitudes outside of the range are wrapped around the antimeridian,
+ * e.g. 190 becomes -170.
+ *
+ * @private
+ * @param {number} lon The longitude.
+ * @returns {number|null}
+ */
+function ensureLongitude(lon) {
+  const num = ensureNumber(lon, -180, 180);
+  if (num !== null) {
+    return num;
+  }
+  if (!Number.isFinite(lon)) {
+    return null;
+  }
+  let normalized = (lon + 180) % 360;
+  if (normalized < 0) {
+    normalized += 360;
+  }
+  return normalized - 180;
+}
+
+/**
  * Ensure this is a valid bounding box.
  *
  * This function will ensure that the given bounding box is valid and otherwise return `null`.
+ *
+ * Longitudes outside of [-180, 180] are wrapped around the antimeridian,
+ * e.g. a bounding box of [175, -41, 190, -37] becomes [175, -41, -170, -37].
+ * This may result in a bounding box that crosses the antimeridian (i.e. west > east)
+ * as defined by GeoJSON (RFC 7946, section 5.2).
  *
  * If the bounding box is 3D, the function will return `null` unless `allow3D` is set to `true`.
  *
@@ -190,9 +220,15 @@ export function ensureBoundingBox(bbox, allow3D = false) {
   let { west, east, south, north, base, height } = toObject(bbox);
   // Some bounding boxes are slightly too large (due to floating point errors).
   // So you may get 90.00000001 instead of 90. To avoid this, we allow for a small delta.
-  west = ensureNumber(west, -180, 180);
+  if (Number.isFinite(west) && Number.isFinite(east) && east - west >= 360) {
+    // The bounding box spans (more than) the whole longitude range
+    west = -180;
+    east = 180;
+  } else {
+    west = ensureLongitude(west);
+    east = ensureLongitude(east);
+  }
   south = ensureNumber(south, -90, 90);
-  east = ensureNumber(east, -180, 180);
   north = ensureNumber(north, -90, 90);
   if (allow3D && bbox.length === 6) {
     bbox = [west, south, base, east, north, height];
