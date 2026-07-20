@@ -206,10 +206,10 @@ function ensureLongitude(lon) {
  * This may result in a bounding box that crosses the antimeridian (i.e. west > east)
  * as defined by GeoJSON (RFC 7946, section 5.2).
  *
- * If the bounding box is 3D, the function will return `null` unless `allow3D` is set to `true`.
+ * If the bounding box is 3D, the function will return a 2D bounding box unless `allow3D` is set to `true`. Doesn't ensure that the bounding box is 3D in case `allow3D` is set to `true`.
  *
  * @param {BoundingBox|Array.<number>} bbox The bounding box to check.
- * @param {boolean} allow3D - Whether to allow 3D bounding boxes or not.
+ * @param {boolean} allow3D - Whether to return 3D bounding boxes or not. By default all bounding boxes are returned as 2D.
  * @returns {BoundingBox|null}
  */
 export function ensureBoundingBox(bbox, allow3D = false) {
