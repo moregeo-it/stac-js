@@ -58,8 +58,25 @@ describe('ensureBoundingBox', () => {
   test('invalid bbox coords', () => {
     expect(ensureBoundingBox([-180, -91, 180, 90])).toBeNull();
     expect(ensureBoundingBox([-180, -90, 180, 91])).toBeNull();
-    expect(ensureBoundingBox([360, -90, 0, 90])).toBeNull();
-    expect(ensureBoundingBox([0, -90, 360, 90])).toBeNull();
+    expect(ensureBoundingBox(['a', -90, 0, 90])).toBeNull();
+    expect(ensureBoundingBox([Infinity, -90, 0, 90])).toBeNull();
+    expect(ensureBoundingBox([0, -90, Infinity, 90])).toBeNull();
+    expect(ensureBoundingBox([-Infinity, -90, 0, 90])).toBeNull();
+    expect(ensureBoundingBox([NaN, -90, 0, 90])).toBeNull();
+    expect(ensureBoundingBox([0, NaN, 10, 90])).toBeNull();
+  });
+
+  test('longitudes are wrapped around the antimeridian', () => {
+    // see https://github.com/radiantearth/stac-browser/issues/736
+    // east of the antimeridian => bbox crosses the antimeridian (west > east)
+    expect(ensureBoundingBox([175, -41, 190, -37])).toEqual([175, -41, -170, -37]);
+    // west of the antimeridian => bbox crosses the antimeridian (west > east)
+    expect(ensureBoundingBox([-190, 10, -170, 20])).toEqual([170, 10, -170, 20]);
+    // both out of range on the same side => normal bbox
+    expect(ensureBoundingBox([185, 10, 190, 20])).toEqual([-175, 10, -170, 20]);
+    // spans (more than) the whole world
+    expect(ensureBoundingBox([0, -90, 360, 90])).toEqual([-180, -90, 180, 90]);
+    expect(ensureBoundingBox([-200, -90, 200, 90])).toEqual([-180, -90, 180, 90]);
   });
 
   test('valid bboxes', () => {
