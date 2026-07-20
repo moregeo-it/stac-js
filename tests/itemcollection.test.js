@@ -54,7 +54,9 @@ test('toGeoJSON', () => {
 });
 
 test('getBoundingBox', () => {
-  expect(ic.getBoundingBox()).toEqual([-68.05964408799198, -18.17458941618659, 172.95, 1.36]);
+  // The two items (near New Zealand and in Bolivia) are unioned into the
+  // smaller extent, which crosses the antimeridian (west > east).
+  expect(ic.getBoundingBox()).toEqual([172.91, -18.17458941618659, -67.01664497565507, 1.36]);
 });
 
 test('getBoundingBoxes', () => {

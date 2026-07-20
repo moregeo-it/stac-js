@@ -40,6 +40,36 @@ test('unionBoundingBox', () => {
   let bbox2 = [-180, -85, 180, 85];
   expect(unionBoundingBox([bbox1, bbox2, null])).toEqual(bbox2);
   expect(unionBoundingBox([null, null, null])).toBeNull();
+
+  // Single bbox unions to itself.
+  expect(unionBoundingBox([[10, -5, 20, 5]])).toEqual([10, -5, 20, 5]);
+
+  // Two disjoint boxes not crossing the antimeridian => normal union.
+  expect(
+    unionBoundingBox([
+      [-10, -5, 0, 5],
+      [10, 0, 20, 10],
+    ]),
+  ).toEqual([-10, -5, 20, 10]);
+
+  // A box crossing the antimeridian keeps its crossing in the union.
+  expect(unionBoundingBox([[175, -10, -179, 10]])).toEqual([175, -10, -179, 10]);
+
+  // Union of a crossing box and a box just west of it stays crossing (west > east).
+  expect(
+    unionBoundingBox([
+      [175, -10, -179, 10],
+      [170, -5, 174, 5],
+    ]),
+  ).toEqual([170, -10, -179, 10]);
+
+  // Union of two boxes on either side of the antimeridian crosses it (smaller extent).
+  expect(
+    unionBoundingBox([
+      [170, 0, 175, 10],
+      [-175, 0, -170, 10],
+    ]),
+  ).toEqual([170, 0, -170, 10]);
 });
 
 describe('ensureBoundingBox', () => {

@@ -260,6 +260,11 @@ export function isAntimeridianBoundingBox(bbox) {
 /**
  * Compute the union of a list of bounding boxes.
  *
+ * The function is aware of the antimeridian: input boxes may cross it (west > east)
+ * and the returned box may cross it, too, if that yields the smaller extent.
+ * Following GeoJSON (RFC 7946, section 5.2), a box crossing the antimeridian is
+ * expressed with a western longitude that is larger than the eastern longitude.
+ *
  * The function ignores any invalid bounding boxes or values for the third dimension.
  *
  * @param {Array.<BoundingBox|null>} bboxes
@@ -271,29 +276,86 @@ export function unionBoundingBox(bboxes) {
     return null;
   }
 
-  const extrema = {
-    west: null,
-    south: null,
-    east: null,
-    north: null,
-  };
-  const min = ['west', 'south'];
+  // Latitude is a simple min/max; longitude has to be handled on the circle so
+  // that boxes crossing the antimeridian are unioned correctly (see below).
+  let south = null;
+  let north = null;
+  // Longitude coverage as intervals on the [0, 360] circle, shifted so that the
+  // antimeridian is the 0/360 seam (180° -> 0, -180° -> 360), going eastward.
+  // Each box contributes its eastward arc from west to east; arcs wrapping past
+  // the seam are split into two so that all intervals are linear. The original
+  // longitudes are kept per endpoint to avoid floating point drift on output;
+  // `null` marks an endpoint that sits exactly on the seam (±180).
+  const pieces = [];
+  let full = false;
   for (let bbox of bboxes) {
     bbox = ensureBoundingBox(bbox);
     if (!bbox) {
       continue;
     }
-    const obj = toObject(bbox);
-    for (const key in obj) {
-      if (extrema[key] === null) {
-        extrema[key] = obj[key];
-      } else {
-        const fn = min.includes(key) ? Math.min : Math.max;
-        extrema[key] = fn(extrema[key], obj[key]);
-      }
+    const { west, south: s, east, north: n } = toObject(bbox);
+    south = south === null ? s : Math.min(south, s);
+    north = north === null ? n : Math.max(north, n);
+
+    if (west === -180 && east === 180) {
+      // Spans the whole longitude range.
+      full = true;
+      continue;
+    }
+    const start = west + 180;
+    const length = (((east + 180 - start) % 360) + 360) % 360;
+    const end = start + length;
+    if (end <= 360) {
+      pieces.push({ s: start, e: end, west, east });
+    } else {
+      pieces.push({ s: start, e: 360, west, east: null });
+      pieces.push({ s: 0, e: end - 360, west: null, east });
     }
   }
 
-  let bbox = [extrema.west, extrema.south, extrema.east, extrema.north];
-  return ensureBoundingBox(bbox);
+  if (south === null) {
+    return null;
+  }
+  if (full || pieces.length === 0) {
+    return ensureBoundingBox([-180, south, 180, north]);
+  }
+
+  // Merge overlapping/touching coverage intervals, keeping the original west of
+  // the interval's start and the original east of its (current) end.
+  pieces.sort((a, b) => a.s - b.s);
+  const merged = [{ ...pieces[0] }];
+  for (let i = 1; i < pieces.length; i++) {
+    const last = merged[merged.length - 1];
+    if (pieces[i].s <= last.e) {
+      if (pieces[i].e > last.e) {
+        last.e = pieces[i].e;
+        last.east = pieces[i].east;
+      }
+    } else {
+      merged.push({ ...pieces[i] });
+    }
+  }
+
+  // The union is the complement of the largest uncovered gap on the circle.
+  let maxGap = -1;
+  let unionWest = merged[0].west;
+  let unionEast = merged[merged.length - 1].east;
+  for (let i = 0; i < merged.length; i++) {
+    const cur = merged[i];
+    const next = merged[(i + 1) % merged.length];
+    const gap = i + 1 < merged.length ? next.s - cur.e : next.s + 360 - cur.e;
+    if (gap > maxGap) {
+      maxGap = gap;
+      unionWest = next.west; // coverage resumes here (west), after the gap
+      unionEast = cur.east; // coverage ends here (east), before the gap
+    }
+  }
+
+  if (maxGap <= 0) {
+    // Fully covered.
+    return ensureBoundingBox([-180, south, 180, north]);
+  }
+
+  // Endpoints that fell exactly on the seam are at the antimeridian (±180).
+  return ensureBoundingBox([unionWest ?? -180, south, unionEast ?? 180, north]);
 }
