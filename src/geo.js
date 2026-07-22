@@ -116,10 +116,18 @@ export function fixGeoJson(geojson) {
  *
  * The Feature contains a Polygon or MultiPolygon based on the given number of valid bounding boxes.
  *
+ * Bounding boxes that cross the antimeridian (i.e. west > east, see RFC 7946, section 5.2)
+ * are always split into two polygons at the antimeridian.
+ * The antimeridian fix for geometries is NOT applied as whether a bounding box
+ * crosses the antimeridian is explicitly encoded (west > east) and must not be
+ * inferred from the longitude span as done for geometries. Otherwise, valid
+ * bounding boxes that span more than 180 degrees of longitude would be broken up.
+ *
  * @param {BoundingBox|Array.<BoundingBox>} bboxes
- * @param {boolean|FixOptions} fixAntimeridian If set to `true` or an options object, geometries that cross the antimeridian are fixed (split into multi-geometries).
+ * @param {boolean|FixOptions} fixAntimeridian Deprecated, has no effect. Bounding boxes are always split at the antimeridian if needed.
  * @returns {Object|null}
  */
+// eslint-disable-next-line no-unused-vars
 export function toGeoJSON(bboxes, fixAntimeridian = false) {
   if (bboxes.every((c) => typeof c === 'number')) {
     // Wrap a single bounding box into an array
@@ -162,12 +170,11 @@ export function toGeoJSON(bboxes, fixAntimeridian = false) {
     };
   }
   if (geometry) {
-    const feature = {
+    return {
       type: 'Feature',
       geometry,
       properties: {},
     };
-    return applyAntimeridianFix(feature, fixAntimeridian);
   }
 }
 

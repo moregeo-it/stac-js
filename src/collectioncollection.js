@@ -64,7 +64,7 @@ class CollectionCollection extends APICollection {
   /**
    * Returns a GeoJSON Feature Collection for this STAC object.
    *
-   * @param {boolean|FixOptions} fixAntimeridian If set to `true` or an options object, geometries that cross the antimeridian are fixed (split into multi-geometries).
+   * @param {boolean|FixOptions} fixAntimeridian Deprecated, has no effect. Bounding boxes are always split at the antimeridian if needed.
    * @returns {Object|null} GeoJSON object or `null`
    */
   toGeoJSON(fixAntimeridian = false) {

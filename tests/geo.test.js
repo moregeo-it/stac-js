@@ -193,6 +193,20 @@ test('toGeoJSON', () => {
       ],
     ]),
   );
+  // A bbox that spans more than 180 degrees of longitude without crossing the
+  // antimeridian (west < east) must not be broken up by the antimeridian fix.
+  // see https://github.com/radiantearth/stac-browser/issues/736
+  const wide = make('Polygon', [
+    [
+      [-176.48, -34.42],
+      [-176.48, -47.27],
+      [178.31, -47.27],
+      [178.31, -34.42],
+      [-176.48, -34.42],
+    ],
+  ]);
+  expect(toGeoJSON([-176.48, -47.27, 178.31, -34.42])).toEqual(wide);
+  expect(toGeoJSON([-176.48, -47.27, 178.31, -34.42], { greatCircle: false })).toEqual(wide);
 });
 
 test('fixGeoJson', () => {
