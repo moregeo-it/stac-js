@@ -1,5 +1,6 @@
 import create from '../src/index';
 import Catalog from '../src/catalog';
+import ChildrenCollection from '../src/childrencollection';
 import Collection from '../src/collection';
 import CollectionCollection from '../src/collectioncollection';
 import Item from '../src/item';
@@ -55,6 +56,15 @@ describe('create', () => {
     };
     let result = create(data, false);
     expect(result).toBeInstanceOf(CollectionCollection);
+  });
+
+  test('returns ChildrenCollection for object without type but with children array', () => {
+    let data = {
+      children: [catalogJson, collectionJson],
+      links: [],
+    };
+    let result = create(data, false);
+    expect(result).toBeInstanceOf(ChildrenCollection);
   });
 
   test('returns Catalog for Catalog type', () => {

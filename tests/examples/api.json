@@ -151,6 +151,12 @@
       "title": "organisation"
     },
     {
+      "rel": "children",
+      "href": "https://example.com/children",
+      "type": "application/json",
+      "title": "Child Catalogs and Collections"
+    },
+    {
       "rel": "root",
       "href": "https://example.com",
       "type": "application/json"

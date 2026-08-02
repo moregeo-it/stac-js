@@ -4,6 +4,7 @@ import Asset from './asset.js';
 import Band from './band.js';
 import Catalog from './catalog.js';
 import CatalogLike from './cataloglike.js';
+import ChildrenCollection from './childrencollection.js';
 import Collection from './collection.js';
 import CollectionCollection from './collectioncollection.js';
 import Item from './item.js';
@@ -23,7 +24,7 @@ import STAC from './stac.js';
  * @param {Object} data The STAC object
  * @param {boolean} migrate `true` to migrate to the latest version, `false` otherwise
  * @param {boolean} updateVersionNumber `true` to update the version number (to the latest version), `false` otherwise. Only applies if `migrate` is set to `true`.
- * @returns {Catalog|Collection|CollectionCollection|Item|ItemCollection} The created object instance.
+ * @returns {Catalog|Collection|CollectionCollection|ChildrenCollection|Item|ItemCollection} The created object instance.
  */
 export default function create(data, migrate = true, updateVersionNumber = false) {
   if (migrate) {
@@ -38,6 +39,8 @@ export default function create(data, migrate = true, updateVersionNumber = false
     (!data.type && typeof data.extent !== 'undefined' && typeof data.license !== 'undefined')
   ) {
     return new Collection(data);
+  } else if (!data.type && Array.isArray(data.children)) {
+    return new ChildrenCollection(data);
   } else if (!data.type && Array.isArray(data.collections)) {
     return new CollectionCollection(data);
   } else {
@@ -51,6 +54,7 @@ export {
   Band,
   Catalog,
   CatalogLike,
+  ChildrenCollection,
   Collection,
   CollectionCollection,
   Item,

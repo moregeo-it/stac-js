@@ -10,6 +10,7 @@ toc:
   - Asset
   - Catalog
   - CatalogLike
+  - ChildrenCollection
   - Collection
   - CollectionCollection
   - Item
