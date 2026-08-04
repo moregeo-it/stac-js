@@ -32,18 +32,23 @@ mkdirSync('docs', { recursive: true });
 // paths without spaces, so they work across platforms) and remove them again.
 const source = 'docs/classes.mmd';
 const css = 'docs/classes.css';
+// CI runners (Ubuntu 23.10+) restrict unprivileged user namespaces, so Chromium's
+// sandbox can't launch. Run headless Chromium without the sandbox to work there.
+const puppeteer = 'docs/puppeteer.json';
 writeFileSync(source, diagram);
 if (rules.length) {
   writeFileSync(css, rules.join('\n') + '\n');
 }
+writeFileSync(puppeteer, JSON.stringify({ args: ['--no-sandbox'] }));
 
 try {
   // All tokens are fixed literals (no user input), so a shell command is safe here.
   const cssArg = rules.length ? ` -C ${css}` : '';
-  execSync(`npx -y -p @mermaid-js/mermaid-cli mmdc -i ${source} -o docs/classes.png -b transparent${cssArg}`, {
+  execSync(`npx -y -p @mermaid-js/mermaid-cli mmdc -i ${source} -o docs/classes.png -b transparent -p ${puppeteer}${cssArg}`, {
     stdio: 'inherit',
   });
 } finally {
   rmSync(source, { force: true });
   rmSync(css, { force: true });
+  rmSync(puppeteer, { force: true });
 }
