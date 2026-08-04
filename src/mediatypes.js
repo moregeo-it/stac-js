@@ -28,11 +28,11 @@ export const browserImageTypes = [
   'image/apng',
   'image/png',
   'image/webp',
+  'image/avif',
   // To be considered in the future if needed.
   // see also https://developer.mozilla.org/en-US/docs/Web/Media/Guides/Formats/Image_types
   //'image/bmp',
   //'image/svg+xml',
-  //'image/avif',
 ];
 
 /**
