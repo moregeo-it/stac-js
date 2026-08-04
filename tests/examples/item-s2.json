@@ -4,7 +4,7 @@
   "stac_extensions": [
     "https://stac-extensions.github.io/eo/v2.0.0/schema.json",
     "https://stac-extensions.github.io/projection/v2.0.0/schema.json",
-    "https://stac-extensions.github.io/view/v1.0.0/schema.json"
+    "https://stac-extensions.github.io/view/v1.1.0/schema.json"
   ],
   "id": "S2A_19KFA_20230227_0_L2A",
   "bbox": [
