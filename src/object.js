@@ -96,6 +96,15 @@ class STACObject {
   }
 
   /**
+   * Check whether this given object is a list of children (i.e. API Children).
+   *
+   * @returns {boolean} `true` if the object is a STAC ChildrenCollection, `false` otherwise.
+   */
+  get isChildrenCollection() {
+    return false;
+  }
+
+  /**
    * Check whether this given object is a STAC reference
    * (i.e. an Asset or a Link).
    *
@@ -110,7 +119,7 @@ class STACObject {
 
   /**
    * Check whether this given object is a STAC API Collection
-   * (i.e. an ItemCollection or a CollectionCollection).
+   * (i.e. an ItemCollection, a CollectionCollection or a ChildrenCollection).
    *
    * @returns {boolean} `true` if the object is a STAC API Collection, `false` otherwise.
    */
@@ -163,6 +172,7 @@ class STACObject {
    * - Catalog
    * - Collection
    * - CollectionCollection
+   * - ChildrenCollection
    * - Item
    * - ItemCollection
    * - Link

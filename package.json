@@ -25,7 +25,8 @@
     "src/"
   ],
   "scripts": {
-    "docs": "npx documentation build src/** -f html --github -o docs --sort-order kind && npx cpy-cli classes.png docs/classes.png",
+    "docs": "npx documentation build src/** -f html --github -o docs --sort-order kind && npm run docs:diagram",
+    "docs:diagram": "node scripts/build-diagram.mjs",
     "docs:lint": "npx documentation lint src/**",
     "lint": "oxlint --fix -c .oxlintrc.json ./src",
     "format": "prettier --write .",
@@ -33,7 +34,6 @@
     "check": "npm run docs:lint && npm run lint && npm test"
   },
   "devDependencies": {
-    "cpy-cli": "^7.0.0",
     "jest": "^30.0.0",
     "jest-html-reporter": "^4.0.0",
     "oxlint": "^1.51.0",

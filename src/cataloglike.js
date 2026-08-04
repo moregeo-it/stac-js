@@ -188,6 +188,15 @@ class CatalogLike extends STAC {
   }
 
   /**
+   * Returns the link for the children endpoint (STAC API - Children extension), if present.
+   *
+   * @returns {Link|null} The API children link
+   */
+  getApiChildrenLink() {
+    return this.getStacLinkWithRel('children');
+  }
+
+  /**
    * Returns all child links.
    *
    * @returns {Array.<Link>} The child links

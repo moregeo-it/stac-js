@@ -2,7 +2,7 @@ import STACHypermedia from './hypermedia.js';
 import { pagination } from './relationtypes.js';
 
 /**
- * A STAC API Collection (i.e. an ItemCollection or a CollectionCollection)
+ * A STAC API Collection (i.e. an ItemCollection, a CollectionCollection or a ChildrenCollection)
  *
  * You can access all properties of the given STAC Catalog object directly, e.g. `collection.links`.
  *
@@ -21,7 +21,7 @@ class APICollection extends STACHypermedia {
 
   /**
    * Check whether this given object is a STAC API Collection
-   * (i.e. an ItemCollection or a CollectionCollection).
+   * (i.e. an ItemCollection, a CollectionCollection or a ChildrenCollection).
    *
    * @returns {boolean} `true` if the object is a STAC API Collection, `false` otherwise.
    */

@@ -27,7 +27,7 @@ const stac = {
 const obj = create(stac); // Migrates data to the latest version
 ```
 
-Directly instantiate `Asset`, `Catalog`, `Collection`, `CollectionCollection`, `Item` or `ItemCollection` through the class constructors:
+Directly instantiate `Asset`, `Catalog`, `Collection`, `CollectionCollection`, `ChildrenCollection`, `Item` or `ItemCollection` through the class constructors:
 
 ```js
 import { Collection } from 'stac-js'; // or Catalog or Item
@@ -72,7 +72,46 @@ console.log(stac.id === obj.id);
 
 To better visualize the available classes (blue), interfaces (yellow) and the inheritance, please consult the simplified class diagram below:
 
-![Class diagram for stac-js](classes.png)
+```mermaid
+classDiagram
+    direction BT
+
+    STACHypermedia --|> STACObject
+    STAC --|> STACHypermedia
+    STACReference --|> STACObject
+    APICollection --|> STACHypermedia
+    CatalogLike --|> STAC
+
+    Item --|> STAC
+    Catalog --|> CatalogLike
+    Collection --|> CatalogLike
+
+    Link --|> STACReference
+    Asset --|> STACReference
+
+    ItemCollection --|> APICollection
+    CollectionCollection --|> APICollection
+    ChildrenCollection --|> APICollection
+
+    classDef interface fill:#fff3bf,stroke:#d9a406,color:#000;
+    classDef concrete fill:#cfe2ff,stroke:#3b6fb5,color:#000;
+
+    class STACObject:::interface
+    class STACHypermedia:::interface
+    class STAC:::interface
+    class CatalogLike:::interface
+    class APICollection:::interface
+    class STACReference:::interface
+
+    class Catalog:::concrete
+    class Collection:::concrete
+    class Item:::concrete
+    class Link:::concrete
+    class Asset:::concrete
+    class ItemCollection:::concrete
+    class CollectionCollection:::concrete
+    class ChildrenCollection:::concrete
+```
 
 > [!NOTE]
 > This library is purely written based on ES6 classes and doesn't do any transpiling etc.
