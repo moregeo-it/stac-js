@@ -87,6 +87,104 @@ test('fixGeoJson: keeps a regular polygon as-is', () => {
   expect(fixGeoJson(simplePolygon)).toEqual(simplePolygon);
 });
 
+test('fixGeoJson: keeps the ring closed when the penultimate vertex is near the first', () => {
+  // The vertex before the closing position is within the loose dedup tolerance of the
+  // first position (at ~140° lon the tolerance is ~0.0014°), so removeConsecutiveDuplicates
+  // would otherwise drop the closing position and leave the ring open. See issue #22.
+  const poly = {
+    type: 'Polygon',
+    coordinates: [
+      [
+        [140, -30],
+        [141, -30],
+        [141, -29],
+        [140.001, -30.0002],
+        [140, -30],
+      ],
+    ],
+  };
+  const fixed = fixGeoJson(poly);
+  const ring = fixed.coordinates[0];
+  expect(ring[0]).toEqual(ring[ring.length - 1]);
+});
+
+test('fixGeoJson: keeps a crossing ring joinable when the penultimate vertex is near the first', () => {
+  // Same near-first penultimate vertex as above, but on a ring that crosses the antimeridian.
+  // segment() deduplicates again internally, so if it drops the closing position the trailing
+  // fragment can no longer be joined to the first one and buildPolygons() emits broken (e.g.
+  // degenerate) fragments instead of a clean two-part split. See issue #22 / PR #23.
+  const poly = {
+    type: 'Polygon',
+    coordinates: [
+      [
+        [170, 40],
+        [-170, 40],
+        [-170, 50],
+        [170, 50],
+        [170.001, 40.0002],
+        [170, 40],
+      ],
+    ],
+  };
+  const fixed = fixGeoJson(poly, { greatCircle: false });
+  // Clean two-part split. Without the fix, the lost closure prevents joining the trailing
+  // fragment and buildPolygons() emits three parts, including a degenerate 3-position ring.
+  expect(fixed.type).toBe('MultiPolygon');
+  expect(fixed.coordinates).toHaveLength(2);
+  // Every ring is a valid, closed GeoJSON ring (first === last, at least 4 positions).
+  for (const p of fixed.coordinates) {
+    for (const ring of p) {
+      expect(ring.length).toBeGreaterThanOrEqual(4);
+      expect(ring[0]).toEqual(ring[ring.length - 1]);
+    }
+  }
+  // The near-first vertex is preserved on the eastern (+180) side, not deduplicated away.
+  const eastRing = fixed.coordinates.map((p) => p[0]).find((r) => r.some((c) => c[0] === 180));
+  expect(eastRing.some((c) => Math.abs(c[0] - 170.001) < 1e-6 && Math.abs(c[1] - 40.0002) < 1e-6)).toBe(true);
+});
+
+test('fixGeoJson: fixes a real-world DEA scene whose penultimate vertex is near the first', () => {
+  // Geometry of a real Digital Earth Australia STAC item that previously threw
+  // "First and last Position are not equivalent" because deduplication dropped the
+  // closing position. See issue #22 (comment by chris-thomas-dev):
+  // https://data.dea.ga.gov.au/baseline/ga_ls9c_ard_3/105/083/2026/07/29/ga_ls9c_ard_3-2-1_105083_2026-07-29_final.stac-item.json
+  const geometry = {
+    type: 'Polygon',
+    coordinates: [
+      [
+        [127.79726817678228, -34.23118992672607],
+        [127.77550004838747, -34.22718645697245],
+        [125.76813838533506, -33.83809319497515],
+        [125.76403701580183, -33.836909643691236],
+        [125.76404147173795, -33.83689437553843],
+        [125.76315442728306, -33.836683646042474],
+        [125.87846119424867, -33.439940220064635],
+        [126.0927082267697, -32.69650190669003],
+        [126.19451882551354, -32.3394704208156],
+        [126.23358309924053, -32.202104867603914],
+        [126.25614064060777, -32.12350046664746],
+        [126.25696758154409, -32.123521322302324],
+        [126.25808841270825, -32.12374846214478],
+        [126.2589763489256, -32.12377007239651],
+        [126.28457542996301, -32.128921459585655],
+        [128.2517601405128, -32.510666535195426],
+        [128.2517885307023, -32.51081201042139],
+        [128.25292496200504, -32.51102279744615],
+        [127.79967600449265, -34.23121163572936],
+        [127.7988446350385, -34.231275399210205],
+        [127.79799310908228, -34.23111863528665],
+        [127.79726817678228, -34.23118992672607],
+      ],
+    ],
+  };
+  expect(() => fixGeoJson(geometry)).not.toThrow();
+  const fixed = fixGeoJson(geometry);
+  // The scene doesn't cross the antimeridian, so it stays a single, closed Polygon.
+  expect(fixed.type).toBe('Polygon');
+  const ring = fixed.coordinates[0];
+  expect(ring[0]).toEqual(ring[ring.length - 1]);
+});
+
 test('fixGeoJson: fixes the winding order of a clockwise polygon', () => {
   const clockwise = {
     type: 'Polygon',

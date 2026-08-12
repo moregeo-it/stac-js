@@ -347,7 +347,10 @@ function fixPolygon(poly, options) {
 function fixPolygonToList(poly, options) {
   const { forceNorthPole = false, forceSouthPole = false, fixWinding = true, greatCircle = true } = options;
 
-  const exterior = removeConsecutiveDuplicates(normalize(closeRing(poly.coordinates[0])));
+  // Re-close the ring after deduplication: removeConsecutiveDuplicates may drop the closing
+  // position if the penultimate vertex is within the loose tolerance of the first.
+  // See issue https://github.com/moregeo-it/stac-js/issues/22
+  const exterior = closeRing(removeConsecutiveDuplicates(normalize(closeRing(poly.coordinates[0]))));
   const interiorRings = poly.coordinates.slice(1).map(closeRing);
   let segments = segment(exterior, greatCircle);
 
@@ -576,7 +579,15 @@ function normalize(coords) {
  * @returns {Array.<Array.<Array.<number>>>} A list of segments (lists of positions).
  */
 function segment(coords, greatCircle) {
+  // A closed ring must stay closed through deduplication: removeConsecutiveDuplicates may
+  // drop the closing position when the penultimate vertex is within the loose tolerance of
+  // the first, which would break the fragment joining below. LineStrings are left open.
+  const wasClosed =
+    coords.length > 1 && coords[0][0] === coords[coords.length - 1][0] && coords[0][1] === coords[coords.length - 1][1];
   coords = removeConsecutiveDuplicates(coords);
+  if (wasClosed) {
+    coords = closeRing(coords);
+  }
   let currentSegment = [];
   const segments = [];
 
