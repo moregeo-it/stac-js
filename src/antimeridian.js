@@ -13,7 +13,7 @@ import { rewind } from '@turf/rewind';
  * which itself is a port of the Python antimeridian package by Pete Gadomski
  * (https://github.com/gadomski/antimeridian).
  *
- * Deviations from antimeridian-ts (all in favor of the Python implementation):
+ * Deviations from antimeridian-ts (mostly in favor of the Python implementation):
  * - Rings of polygons that were split at the antimeridian are properly closed
  *   (first position === last position) as required by the GeoJSON specification.
  * - Geometry types that can't cross the antimeridian (e.g. Point and MultiPoint)
@@ -26,6 +26,9 @@ import { rewind } from '@turf/rewind';
  * - The centroid is area-weighted (as in shapely) instead of a mean of the vertices.
  * - Multiple holes in the same polygon are all preserved (the Python implementation
  *   in fact drops all but the last hole per polygon).
+ * - Near-duplicate positions are detected with an absolute tolerance instead of
+ *   numpy's default relative tolerance, which collapses small geometries far from
+ *   the null island (https://github.com/gadomski/antimeridian/issues/230).
  *
  * @module antimeridian
  */
@@ -89,6 +92,12 @@ function closeRing(ring) {
 /**
  * Removes consecutive near-duplicate positions from a list of positions.
  *
+ * Uses an absolute tolerance (`numpy.allclose` with `rtol=0, atol=1e-8`) instead of
+ * numpy's default relative tolerance: a tolerance that scales with the coordinate
+ * values collapses small geometries far from the null island to degenerate rings,
+ * e.g. ~1 mm precision at the equator vs. ~50 m at 50° latitude.
+ * See https://github.com/gadomski/antimeridian/issues/230
+ *
  * @private
  * @param {Array.<Array.<number>>} coords A list of positions.
  * @returns {Array.<Array.<number>>} The list of positions without consecutive near-duplicates.
@@ -100,7 +109,7 @@ function removeConsecutiveDuplicates(coords) {
   const result = [coords[0]];
   for (let i = 1; i < coords.length; i++) {
     const prev = result[result.length - 1];
-    if (!isCloseLoose(coords[i][0], prev[0]) || !isCloseLoose(coords[i][1], prev[1])) {
+    if (Math.abs(coords[i][0] - prev[0]) > 1e-8 || Math.abs(coords[i][1] - prev[1]) > 1e-8) {
       result.push(coords[i]);
     }
   }
@@ -348,7 +357,7 @@ function fixPolygonToList(poly, options) {
   const { forceNorthPole = false, forceSouthPole = false, fixWinding = true, greatCircle = true } = options;
 
   // Re-close the ring after deduplication: removeConsecutiveDuplicates may drop the closing
-  // position if the penultimate vertex is within the loose tolerance of the first.
+  // position if the penultimate vertex is within the dedup tolerance of the first.
   // See issue https://github.com/moregeo-it/stac-js/issues/22
   const exterior = closeRing(removeConsecutiveDuplicates(normalize(closeRing(poly.coordinates[0]))));
   const interiorRings = poly.coordinates.slice(1).map(closeRing);
@@ -580,7 +589,7 @@ function normalize(coords) {
  */
 function segment(coords, greatCircle) {
   // A closed ring must stay closed through deduplication: removeConsecutiveDuplicates may
-  // drop the closing position when the penultimate vertex is within the loose tolerance of
+  // drop the closing position when the penultimate vertex is within the dedup tolerance of
   // the first, which would break the fragment joining below. LineStrings are left open.
   const wasClosed =
     coords.length > 1 && coords[0][0] === coords[coords.length - 1][0] && coords[0][1] === coords[coords.length - 1][1];

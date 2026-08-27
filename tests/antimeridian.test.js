@@ -88,9 +88,9 @@ test('fixGeoJson: keeps a regular polygon as-is', () => {
 });
 
 test('fixGeoJson: keeps the ring closed when the penultimate vertex is near the first', () => {
-  // The vertex before the closing position is within the loose dedup tolerance of the
-  // first position (at ~140° lon the tolerance is ~0.0014°), so removeConsecutiveDuplicates
-  // would otherwise drop the closing position and leave the ring open. See issue #22.
+  // The vertex before the closing position is within the dedup tolerance (1e-8) of the
+  // first position, so removeConsecutiveDuplicates would otherwise drop the closing
+  // position and leave the ring open. See issue #22.
   const poly = {
     type: 'Polygon',
     coordinates: [
@@ -98,7 +98,7 @@ test('fixGeoJson: keeps the ring closed when the penultimate vertex is near the 
         [140, -30],
         [141, -30],
         [141, -29],
-        [140.001, -30.0002],
+        [140.000000005, -30.000000005],
         [140, -30],
       ],
     ],
@@ -121,7 +121,7 @@ test('fixGeoJson: keeps a crossing ring joinable when the penultimate vertex is 
         [-170, 40],
         [-170, 50],
         [170, 50],
-        [170.001, 40.0002],
+        [170.000000005, 40.000000005],
         [170, 40],
       ],
     ],
@@ -140,7 +140,9 @@ test('fixGeoJson: keeps a crossing ring joinable when the penultimate vertex is 
   }
   // The near-first vertex is preserved on the eastern (+180) side, not deduplicated away.
   const eastRing = fixed.coordinates.map((p) => p[0]).find((r) => r.some((c) => c[0] === 180));
-  expect(eastRing.some((c) => Math.abs(c[0] - 170.001) < 1e-6 && Math.abs(c[1] - 40.0002) < 1e-6)).toBe(true);
+  expect(eastRing.some((c) => Math.abs(c[0] - 170.000000005) < 1e-10 && Math.abs(c[1] - 40.000000005) < 1e-10)).toBe(
+    true,
+  );
 });
 
 test('fixGeoJson: fixes a real-world DEA scene whose penultimate vertex is near the first', () => {
@@ -182,6 +184,41 @@ test('fixGeoJson: fixes a real-world DEA scene whose penultimate vertex is near 
   // The scene doesn't cross the antimeridian, so it stays a single, closed Polygon.
   expect(fixed.type).toBe('Polygon');
   const ring = fixed.coordinates[0];
+  expect(ring[0]).toEqual(ring[ring.length - 1]);
+});
+
+test('fixGeoJson: keeps very small footprints intact', () => {
+  // A ~10 x 6 m landscape element. A dedup tolerance relative to the coordinate values
+  // (~50 m in latitude at 50°N) collapses the ring to fewer than 4 positions, making
+  // turf's polygon() throw "Each LinearRing of a Polygon must have 4 or more Positions".
+  // See https://github.com/radiantearth/stac-browser/issues/1002
+  const geometry = {
+    type: 'MultiPolygon',
+    coordinates: [
+      [
+        [
+          [5.924644101, 50.777198179],
+          [5.924646423, 50.777190599],
+          [5.924652201, 50.777171705],
+          [5.924595033, 50.777150348],
+          [5.924552903, 50.777148292],
+          [5.924557435, 50.777193782],
+          [5.924529216, 50.777193909],
+          [5.924584781, 50.77720037],
+          [5.924587654, 50.777191403],
+          [5.924606609, 50.777193841],
+          [5.924644101, 50.777198179],
+        ],
+      ],
+    ],
+  };
+  expect(() => fixGeoJson(geometry, { greatCircle: false })).not.toThrow();
+  const fixed = fixGeoJson(geometry, { greatCircle: false });
+  expect(fixed.type).toBe('MultiPolygon');
+  expect(fixed.coordinates).toHaveLength(1);
+  const ring = fixed.coordinates[0][0];
+  // All 11 positions survive deduplication and the ring stays closed.
+  expect(ring).toHaveLength(11);
   expect(ring[0]).toEqual(ring[ring.length - 1]);
 });
 
