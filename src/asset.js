@@ -336,8 +336,12 @@ class Asset extends STACReference {
     if (isObject(assets)) {
       for (let i in assets) {
         const a = assets[i];
-        const newAsset = a instanceof Asset ? a : new Asset(a, i, context);
-        newAssets[i] = newAsset;
+        // Skip malformed entries that can't be converted to an Asset
+        if (a instanceof Asset) {
+          newAssets[i] = a;
+        } else if (isObject(a)) {
+          newAssets[i] = new Asset(a, i, context);
+        }
       }
     }
     return newAssets;

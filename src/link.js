@@ -62,7 +62,8 @@ class Link extends STACReference {
     if (!Array.isArray(links)) {
       return [];
     }
-    return links.map((link) => (isObject(link) ? new Link(link, context) : link));
+    // Skip malformed entries that can't be converted to a Link
+    return links.filter((link) => isObject(link)).map((link) => (link instanceof Link ? link : new Link(link, context)));
   }
 }
 

@@ -28,7 +28,13 @@ class ItemCollection extends APICollection {
 
   constructor(data, absoluteUrl = null) {
     const keyMap = {
-      features: (features) => features.map((feature) => (feature instanceof Item ? feature : new Item(feature))),
+      // Skip malformed entries that can't be converted to an Item
+      features: (features) =>
+        Array.isArray(features)
+          ? features
+              .filter((feature) => isObject(feature))
+              .map((feature) => (feature instanceof Item ? feature : new Item(feature)))
+          : [],
     };
     super(data, absoluteUrl, keyMap);
   }
@@ -48,7 +54,7 @@ class ItemCollection extends APICollection {
    * @returns {Array.<Item>} All STAC Items
    */
   getAll() {
-    return this.features;
+    return Array.isArray(this.features) ? this.features.filter((item) => item instanceof Item) : [];
   }
 
   /**
@@ -76,7 +82,7 @@ class ItemCollection extends APICollection {
    * @returns {Array.<BoundingBox>}
    */
   getBoundingBoxes() {
-    return this.features.map((item) => item.getBoundingBox());
+    return this.getAll().map((item) => item.getBoundingBox());
   }
 
   /**
@@ -94,7 +100,7 @@ class ItemCollection extends APICollection {
    * @returns {Array.<Array.<Date|null>>}
    */
   getTemporalExtents() {
-    return this.features.map((item) => item.getTemporalExtent());
+    return this.getAll().map((item) => item.getTemporalExtent());
   }
 }
 

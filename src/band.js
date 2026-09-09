@@ -1,4 +1,4 @@
-import { getStatistics, getNoDataValues } from './utils.js';
+import { getStatistics, getNoDataValues, isObject } from './utils.js';
 import STACObject from './object.js';
 
 /**
@@ -124,8 +124,12 @@ class Band extends STACObject {
     if (Array.isArray(bands)) {
       for (let i in bands) {
         const b = bands[i];
-        const newBand = b instanceof Band ? b : new Band(b, i, context);
-        newBands.push(newBand);
+        // Skip malformed entries that can't be converted to a Band
+        if (b instanceof Band) {
+          newBands.push(b);
+        } else if (isObject(b)) {
+          newBands.push(new Band(b, i, context));
+        }
       }
     }
     return newBands;

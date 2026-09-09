@@ -258,7 +258,7 @@ class STACObject {
       if (key in this._keyMap) {
         let v2 = Array.isArray(v) ? [] : {};
         for (let key in v) {
-          if (typeof v[key].toJSON === 'function') {
+          if (typeof v[key]?.toJSON === 'function') {
             v2[key] = v[key].toJSON();
           } else {
             v2[key] = v[key];

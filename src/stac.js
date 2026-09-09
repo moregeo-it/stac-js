@@ -1,5 +1,6 @@
 import { cogMediaTypes, geotiffMediaTypes, isMediaType, wozMediaTypes, zarrMediaTypes } from './mediatypes.js';
 import { isObject, hasText } from './utils.js';
+import Asset from './asset.js';
 import STACHypermedia from './hypermedia.js';
 import { getBest } from './locales.js';
 
@@ -298,7 +299,7 @@ class STAC extends STACHypermedia {
     if (!(this.isItem || this.isCollection) || !isObject(this.assets)) {
       return null;
     }
-    return this.assets[key] || null;
+    return this.assets[key] instanceof Asset ? this.assets[key] : null;
   }
 
   /**
@@ -310,7 +311,7 @@ class STAC extends STACHypermedia {
     if (!(this.isItem || this.isCollection) || !isObject(this.assets)) {
       return [];
     }
-    return Object.values(this.assets);
+    return Object.values(this.assets).filter((asset) => asset instanceof Asset);
   }
 
   /**

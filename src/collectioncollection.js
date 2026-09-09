@@ -28,8 +28,13 @@ class CollectionCollection extends APICollection {
 
   constructor(data, absoluteUrl = null) {
     const keyMap = {
+      // Skip malformed entries that can't be converted to a Collection
       collections: (collections) =>
-        collections.map((collection) => (collection instanceof Collection ? collection : new Collection(collection))),
+        Array.isArray(collections)
+          ? collections
+              .filter((collection) => isObject(collection))
+              .map((collection) => (collection instanceof Collection ? collection : new Collection(collection)))
+          : [],
     };
     super(data, absoluteUrl, keyMap);
   }
@@ -49,7 +54,9 @@ class CollectionCollection extends APICollection {
    * @returns {Array.<Collection>} All STAC Collections
    */
   getAll() {
-    return this.collections;
+    return Array.isArray(this.collections)
+      ? this.collections.filter((collection) => collection instanceof Collection)
+      : [];
   }
 
   /**
@@ -68,7 +75,7 @@ class CollectionCollection extends APICollection {
    * @returns {Object|null} GeoJSON object or `null`
    */
   toGeoJSON(fixAntimeridian = false) {
-    let features = this.collections
+    let features = this.getAll()
       .map((collection) => collection.toGeoJSON(fixAntimeridian))
       .filter((geojson) => geojson !== null);
     return {
@@ -92,7 +99,7 @@ class CollectionCollection extends APICollection {
    * @returns {Array.<BoundingBox>}
    */
   getBoundingBoxes() {
-    return this.collections.map((collection) => collection.getBoundingBox());
+    return this.getAll().map((collection) => collection.getBoundingBox());
   }
 
   /**
@@ -110,7 +117,7 @@ class CollectionCollection extends APICollection {
    * @returns {Array.<Array.<Date|null>>}
    */
   getTemporalExtents() {
-    return this.collections.map((collection) => collection.getTemporalExtent());
+    return this.getAll().map((collection) => collection.getTemporalExtent());
   }
 
   /**

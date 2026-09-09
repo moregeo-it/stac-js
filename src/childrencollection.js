@@ -30,13 +30,18 @@ class ChildrenCollection extends APICollection {
 
   constructor(data, absoluteUrl = null) {
     const keyMap = {
+      // Skip malformed entries that can't be converted to a Catalog or Collection
       children: (children) =>
-        children.map((child) => {
-          if (child instanceof STAC) {
-            return child;
-          }
-          return child?.type === 'Collection' ? new Collection(child) : new Catalog(child);
-        }),
+        Array.isArray(children)
+          ? children
+              .filter((child) => isObject(child))
+              .map((child) => {
+                if (child instanceof STAC) {
+                  return child;
+                }
+                return child.type === 'Collection' ? new Collection(child) : new Catalog(child);
+              })
+          : [],
     };
     super(data, absoluteUrl, keyMap);
   }
@@ -56,7 +61,7 @@ class ChildrenCollection extends APICollection {
    * @returns {Array.<Catalog|Collection>} All child Catalogs and Collections
    */
   getAll() {
-    return this.children;
+    return Array.isArray(this.children) ? this.children.filter((child) => child instanceof STAC) : [];
   }
 
   /**
@@ -77,7 +82,7 @@ class ChildrenCollection extends APICollection {
    * @returns {Object|null} GeoJSON object or `null`
    */
   toGeoJSON(fixAntimeridian = false) {
-    let features = this.children.map((child) => child.toGeoJSON(fixAntimeridian)).filter((geojson) => geojson !== null);
+    let features = this.getAll().map((child) => child.toGeoJSON(fixAntimeridian)).filter((geojson) => geojson !== null);
     return {
       type: 'FeatureCollection',
       features,
@@ -100,7 +105,7 @@ class ChildrenCollection extends APICollection {
    * @returns {Array.<BoundingBox>}
    */
   getBoundingBoxes() {
-    return this.children.map((child) => child.getBoundingBox()).filter((bbox) => bbox !== null);
+    return this.getAll().map((child) => child.getBoundingBox()).filter((bbox) => bbox !== null);
   }
 
   /**
@@ -119,7 +124,7 @@ class ChildrenCollection extends APICollection {
    * @returns {Array.<Array.<Date|null>>}
    */
   getTemporalExtents() {
-    return this.children.map((child) => child.getTemporalExtent()).filter((extent) => extent !== null);
+    return this.getAll().map((child) => child.getTemporalExtent()).filter((extent) => extent !== null);
   }
 }
 
