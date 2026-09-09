@@ -96,6 +96,49 @@ test('getAssets', () => {
   expect(c.getAssets()).toEqual([]);
 });
 
+describe('assets in Catalogs are ignored', () => {
+  // Catalogs don't support assets, but some implementations expose them anyway.
+  // They are not converted to Asset objects, so the accessors must ignore them.
+  let catalog = new Catalog({
+    id: 'test',
+    type: 'Catalog',
+    stac_version: '1.1.0',
+    description: 'test',
+    links: [],
+    assets: {
+      thumbnail: { href: 'https://example.com/thumb.jpg', type: 'image/jpeg', roles: ['thumbnail'] },
+    },
+  });
+
+  test('getAsset', () => {
+    expect(catalog.getAsset('thumbnail')).toBeNull();
+  });
+
+  test('getAssets', () => {
+    expect(catalog.getAssets()).toEqual([]);
+  });
+
+  test('getThumbnails', () => {
+    expect(catalog.getThumbnails(true, 'thumbnail', true)).toEqual([]);
+  });
+
+  test('assets are ignored even without a type field', () => {
+    // Without stac-migrate, old catalogs may not have a type field at all.
+    let noType = new Catalog({
+      id: 'test',
+      stac_version: '0.9.0',
+      description: 'test',
+      links: [],
+      assets: {
+        thumbnail: { href: 'https://example.com/thumb.jpg', type: 'image/jpeg', roles: ['thumbnail'] },
+      },
+    });
+    expect(noType.getAsset('thumbnail')).toBeNull();
+    expect(noType.getAssets()).toEqual([]);
+    expect(noType.getThumbnails(true, 'thumbnail', true)).toEqual([]);
+  });
+});
+
 describe('getQueryablesLink', () => {
   test('returns queryables link with ogc rel', () => {
     let catalog = new Catalog(apiJson);

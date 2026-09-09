@@ -295,7 +295,7 @@ class STAC extends STACHypermedia {
    * @returns {Asset|null} The matching asset, or `null` if not found.
    */
   getAsset(key) {
-    if (!isObject(this.assets)) {
+    if (!(this.isItem || this.isCollection) || !isObject(this.assets)) {
       return null;
     }
     return this.assets[key] || null;
@@ -307,7 +307,7 @@ class STAC extends STACHypermedia {
    * @returns {Array.<Asset>} An array of all assets.
    */
   getAssets() {
-    if (!isObject(this.assets)) {
+    if (!(this.isItem || this.isCollection) || !isObject(this.assets)) {
       return [];
     }
     return Object.values(this.assets);
