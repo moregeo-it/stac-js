@@ -14,6 +14,12 @@ test('Basics', () => {
   expect(cc.getAbsoluteUrl()).toBe(null);
 });
 
+test('Relative self links of Collections are resolved against the response URL', () => {
+  const c1 = Object.assign({}, collection, { links: [{ rel: 'self', href: 'collections/c1' }] });
+  const cc2 = new CollectionCollection({ collections: [c1], links: [] }, 'https://stac.example/api/');
+  expect(cc2.collections[0].getAbsoluteUrl()).toBe('https://stac.example/api/collections/c1');
+});
+
 test('is...', () => {
   expect(cc.isItem).toBeFalsy();
   expect(cc.isCatalog).toBeFalsy();

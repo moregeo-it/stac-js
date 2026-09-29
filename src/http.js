@@ -1,4 +1,4 @@
-import { URI } from './utils.js';
+import { URI, isObject } from './utils.js';
 
 /**
  * Protocols supported by browsers (http and https).
@@ -17,6 +17,27 @@ export const browserProtocols = ['http', 'https'];
  */
 export function toAbsolute(href, baseUrl, stringify = true) {
   return normalizeUri(href, baseUrl, false, stringify);
+}
+
+/**
+ * Gets the URL of the `self` link of the given STAC data and resolves it against the given base URL.
+ *
+ * Use this for STAC entities that are embedded in another document, e.g. the Items in an ItemCollection.
+ * Relative URLs in their links must be resolved against the URL of the embedding document.
+ *
+ * @param {Object} data The STAC data (plain object).
+ * @param {string|null} baseUrl The URL of the document that contains the data, or `null` if unknown.
+ * @returns {string|null} The URL of the self link, absolute if a base URL is given, or `null` if there's no self link.
+ */
+export function resolveSelfUrl(data, baseUrl = null) {
+  if (!isObject(data) || !Array.isArray(data.links)) {
+    return null;
+  }
+  const self = data.links.find((link) => isObject(link) && link.rel === 'self' && typeof link.href === 'string');
+  if (!self) {
+    return null;
+  }
+  return toAbsolute(self.href, baseUrl);
 }
 
 /**
