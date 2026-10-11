@@ -14,6 +14,7 @@ import STACHypermedia from './hypermedia.js';
 import STACObject from './object.js';
 import STACReference from './reference.js';
 import STAC from './stac.js';
+import { isObject } from './utils.js';
 
 /**
  * Creates the corresponding object for a object that conforms to the STAC specification.
@@ -27,6 +28,19 @@ import STAC from './stac.js';
  * @returns {Catalog|Collection|CollectionCollection|ChildrenCollection|Item|ItemCollection} The created object instance.
  */
 export default function create(data, migrate = true, updateVersionNumber = false) {
+  // OGC API - Records responses are also catalogs (type, but no stac_version) and stac-migrate would add a type
+  if (!data.type || (!data.stac_version && (data.type === 'Catalog' || data.type === 'Collection'))) {
+    if (ChildrenCollection.isResponse(data)) {
+      if (migrate) {
+        data.children = data.children.map((child) =>
+          isObject(child) ? Migrate.stac(child, updateVersionNumber) : child,
+        );
+      }
+      return new ChildrenCollection(data);
+    } else if (CollectionCollection.isResponse(data)) {
+      return new CollectionCollection(migrate ? Migrate.collectionCollection(data, updateVersionNumber) : data);
+    }
+  }
   if (migrate) {
     data = Migrate.stac(data, updateVersionNumber);
   }
@@ -39,10 +53,6 @@ export default function create(data, migrate = true, updateVersionNumber = false
     (!data.type && typeof data.extent !== 'undefined' && typeof data.license !== 'undefined')
   ) {
     return new Collection(data);
-  } else if (!data.type && Array.isArray(data.children)) {
-    return new ChildrenCollection(data);
-  } else if (!data.type && Array.isArray(data.collections)) {
-    return new CollectionCollection(data);
   } else {
     return new Catalog(data);
   }

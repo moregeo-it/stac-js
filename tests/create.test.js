@@ -124,3 +124,93 @@ describe('create', () => {
     expect(result).toBeInstanceOf(Catalog);
   });
 });
+
+describe('create with list responses and edge cases', () => {
+  const clone = (data) => JSON.parse(JSON.stringify(data));
+  const catalog060 = () => ({ stac_version: '0.6.0', id: 'cat', description: 'd', links: [] });
+  const collection060 = () => ({
+    stac_version: '0.6.0',
+    id: 'col',
+    description: 'd',
+    license: 'MIT',
+    extent: { spatial: [-180, -90, 180, 90], temporal: ['2000-01-01T00:00:00Z', null] },
+    links: [],
+  });
+  const withoutVersion = (data) => {
+    delete data.stac_version;
+    return data;
+  };
+
+  const cases = [
+    ['0.6.0 Catalog without type', catalog060, Catalog],
+    ['0.6.0 Collection without type', collection060, Collection],
+    ['Catalog without type and stac_version', () => withoutVersion(catalog060()), Catalog],
+    ['Collection without type and stac_version', () => withoutVersion(collection060()), Collection],
+    ['Item without stac_version', () => withoutVersion(clone(itemJson)), Item],
+    ['API root', () => clone(apiJson), Catalog],
+    ['collections without type', () => ({ collections: [collection060()], links: [] }), CollectionCollection],
+    [
+      'collections without type, with stac_version',
+      () => ({ stac_version: '1.0.0', collections: [collection060()], links: [] }),
+      CollectionCollection,
+    ],
+    [
+      'children without type',
+      () => ({ children: [clone(catalogJson), clone(collectionJson)], links: [] }),
+      ChildrenCollection,
+    ],
+    [
+      'OGC API - Records collections response',
+      () => ({ type: 'Collection', id: 'records', links: [], collections: [clone(collectionJson)] }),
+      CollectionCollection,
+    ],
+    [
+      'OGC API - Records children response',
+      () => ({ type: 'Catalog', id: 'records', links: [], children: [clone(catalogJson)] }),
+      ChildrenCollection,
+    ],
+    ['Catalog with stac_version and children', () => ({ ...clone(catalogJson), children: [] }), Catalog],
+    ['Collection with stac_version and collections', () => ({ ...clone(collectionJson), collections: [] }), Collection],
+    ['Feature without stac_version and children', () => ({ ...withoutVersion(clone(itemJson)), children: [] }), Item],
+    [
+      'FeatureCollection without stac_version and collections',
+      () => ({ type: 'FeatureCollection', features: [], links: [], collections: [clone(collectionJson)] }),
+      ItemCollection,
+    ],
+  ];
+
+  describe.each([true, false])('migrate = %s', (migrate) => {
+    test.each(cases)('%s', (name, data, expected) => {
+      expect(create(data(), migrate)).toBeInstanceOf(expected);
+    });
+  });
+
+  test('migrates the collections of a CollectionCollection', () => {
+    let data = () => ({ collections: [collection060()], links: [] });
+    let result = create(data());
+    expect(result.collections[0]).toBeInstanceOf(Collection);
+    expect(result.collections[0].extent.spatial.bbox).toEqual([[-180, -90, 180, 90]]);
+    expect(result.collections[0].stac_version).toBe('0.6.0');
+    expect(create(data(), true, true).collections[0].stac_version).toBe('1.1.0');
+    expect(create(data(), false).collections[0].extent.spatial).toEqual([-180, -90, 180, 90]);
+  });
+
+  test('migrates the children of a ChildrenCollection', () => {
+    let data = () => ({ children: [catalog060(), collection060(), null], links: [] });
+    let result = create(data());
+    expect(result.children.length).toBe(2);
+    expect(result.children[0]).toBeInstanceOf(Catalog);
+    expect(result.children[1]).toBeInstanceOf(Collection);
+    expect(result.children[1].extent.spatial.bbox).toEqual([[-180, -90, 180, 90]]);
+    expect(result.children[1].stac_version).toBe('0.6.0');
+    expect(create(data(), true, true).children.map((child) => child.stac_version)).toEqual(['1.1.0', '1.1.0']);
+    // Without migration, the collection lacks a type and is treated as a catalog
+    expect(create(data(), false).children[1]).toBeInstanceOf(Catalog);
+  });
+
+  test('does not add Collection fields to an OGC API - Records collections response', () => {
+    let result = create({ type: 'Collection', id: 'records', links: [], collections: [clone(collectionJson)] });
+    expect(result.license).toBeUndefined();
+    expect(result.extent).toBeUndefined();
+  });
+});
