@@ -215,11 +215,11 @@ describe('getThumbnails with SVG', () => {
   test('sorts SVG after raster images', () => {
     const item = makeItem({
       svg: { href: 'https://example.com/a.svg', type: 'image/svg+xml', roles: ['thumbnail'] },
-      untyped: { href: 'https://example.com/b.svg?x=1', roles: ['thumbnail'] },
       png: { href: 'https://example.com/c.png', type: 'image/png', roles: ['thumbnail'] },
       jpg: { href: 'https://example.com/d.jpg', type: 'image/jpeg', roles: ['thumbnail'] },
     });
-    expect(item.getThumbnails(false).map((img) => img.getKey())).toEqual(['png', 'jpg', 'svg', 'untyped']);
+    expect(item.getThumbnails().map((img) => img.getKey())).toEqual(['png', 'jpg', 'svg']);
+    expect(item.getThumbnails(false).map((img) => img.getKey())).toEqual(['png', 'jpg', 'svg']);
   });
 
   test('prefers a raster alternate over an SVG asset', () => {

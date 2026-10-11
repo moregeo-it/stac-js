@@ -1,13 +1,15 @@
-import { cogMediaTypes, geotiffMediaTypes, isMediaType, wozMediaTypes, zarrMediaTypes } from './mediatypes.js';
+import {
+  cogMediaTypes,
+  geotiffMediaTypes,
+  isMediaType,
+  svgMediaType,
+  wozMediaTypes,
+  zarrMediaTypes,
+} from './mediatypes.js';
 import { isObject, hasText } from './utils.js';
 import Asset from './asset.js';
 import STACHypermedia from './hypermedia.js';
 import { getBest } from './locales.js';
-
-const isSvg = (img) =>
-  hasText(img.type)
-    ? isMediaType(img.type, 'image/svg+xml')
-    : typeof img.href === 'string' && /\.svg$/i.test(img.href.split(/[?#]/)[0]);
 
 /**
  * Class for STAC spec entities (Item, Catalog and Collection).
@@ -89,15 +91,14 @@ class STAC extends STACHypermedia {
    * Get the thumbnails from the assets and links in a STAC entity.
    *
    * If `browserOnly` is enabled and an asset can't be shown in a browser
-   * (e.g. it is not served over HTTP/S), its alternate assets are checked and
+   * (e.g. it is not served over HTTP/S) or is an SVG, its alternate assets are checked and
    * the first alternate asset that a browser can show is returned instead.
    * Such an asset is merged with the metadata of its parent asset (see
    * `Asset.fillAlternate`) and `getContext()` returns the parent asset.
-   * SVG assets are also replaced with a raster alternate asset, if available.
    *
    * SVG images are sorted after raster images.
    *
-   * @param {boolean} browserOnly - Return only images that can be shown in a browser natively (PNG/JPG/GIF/WEBP + HTTP/S).
+   * @param {boolean} browserOnly - Return only images that can be shown in a browser natively (GIF/JPEG/PNG/WebP/AVIF/SVG + HTTP/S).
    * @param {string|null} prefer - If not `null` (default), prefers a role over the other. Either `thumbnail` or `overview`.
    * @param {boolean} includeGraphic - Also include assets with the role `graphic`.
    * @returns {Array.<STACReference>} Asset or Link
@@ -117,6 +118,7 @@ class STAC extends STACHypermedia {
         thumbnails.push(thumbnail);
       }
     }
+    const isSvg = (img) => img.isType(svgMediaType);
     if (browserOnly) {
       // Replace all images that can't be displayed in a browser with a
       // browser-displayable alternate asset (if available), remove them otherwise.
@@ -125,14 +127,13 @@ class STAC extends STACHypermedia {
         .map((img) => {
           if (img.canBrowserDisplayImage() && !isSvg(img)) {
             return img;
+          } else if (img.isAsset) {
+            const alternate = img.getAlternates(true).find((alt) => alt.canBrowserDisplayImage());
+            if (alternate) {
+              return alternate;
+            }
           }
-          // Prefer a raster alternate over an SVG or non-displayable asset
-          const alternates = img.isAsset ? img.getAlternates(true).filter((alt) => alt.canBrowserDisplayImage()) : [];
-          const raster = alternates.find((alt) => !isSvg(alt));
-          if (raster) {
-            return raster;
-          }
-          return img.canBrowserDisplayImage() ? img : alternates[0] || null;
+          return img.canBrowserDisplayImage() ? img : null;
         })
         .filter((img) => img !== null);
     }
