@@ -4,6 +4,7 @@ import STAC from './stac.js';
 import { unionDateTime } from './datetime.js';
 import { unionBoundingBox } from './geo.js';
 import { isObject } from './utils.js';
+import { resolveSelfUrl } from './http.js';
 import APICollection from './apicollection.js';
 
 /**
@@ -39,7 +40,8 @@ class ChildrenCollection extends APICollection {
                 if (child instanceof STAC) {
                   return child;
                 }
-                return child.type === 'Collection' ? new Collection(child) : new Catalog(child);
+                const url = resolveSelfUrl(child, absoluteUrl);
+                return child.type === 'Collection' ? new Collection(child, url) : new Catalog(child, url);
               })
           : [],
     };
