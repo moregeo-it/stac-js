@@ -77,12 +77,15 @@ test('canBrowserDisplayImage', () => {
   expect(link('image/png').canBrowserDisplayImage()).toBeTruthy();
   expect(link('image/webp').canBrowserDisplayImage()).toBeTruthy();
   expect(link('IMAGE/WEBP').canBrowserDisplayImage()).toBeTruthy();
+  expect(link('image/svg+xml').canBrowserDisplayImage()).toBeTruthy();
 
   expect(new Link({ href: 'https://example.com/image.jpg' }).canBrowserDisplayImage(true)).toBeTruthy();
   expect(new Link({ href: 'http://example.com/image.jpg' }).canBrowserDisplayImage(true)).toBeTruthy();
   expect(new Link({ href: 'HTTP://EXAMPLE.COM/IMAGE.JPEG' }).canBrowserDisplayImage(true)).toBeTruthy();
   expect(new Link({ href: './image.jpg' }).canBrowserDisplayImage(true)).toBeTruthy();
   expect(link('image/jpeg').canBrowserDisplayImage(true)).toBeTruthy();
+  expect(new Link({ href: 'https://example.com/icon.svg' }).canBrowserDisplayImage(true)).toBeTruthy();
+  expect(new Link({ href: 'https://example.com/icon.svg' }).canBrowserDisplayImage()).toBeFalsy();
 
   expect(new Link({ href: 'https://example.com/image.bmp' }).canBrowserDisplayImage(true)).toBeFalsy();
   expect(new Link({ href: 's3://example.com/image.jpg' }).canBrowserDisplayImage(true)).toBeFalsy();

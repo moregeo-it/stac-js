@@ -1,4 +1,11 @@
-import { cogMediaTypes, geotiffMediaTypes, isMediaType, wozMediaTypes, zarrMediaTypes } from './mediatypes.js';
+import {
+  cogMediaTypes,
+  geotiffMediaTypes,
+  isMediaType,
+  svgMediaType,
+  wozMediaTypes,
+  zarrMediaTypes,
+} from './mediatypes.js';
 import { isObject, hasText } from './utils.js';
 import Asset from './asset.js';
 import STACHypermedia from './hypermedia.js';
@@ -84,12 +91,14 @@ class STAC extends STACHypermedia {
    * Get the thumbnails from the assets and links in a STAC entity.
    *
    * If `browserOnly` is enabled and an asset can't be shown in a browser
-   * (e.g. it is not served over HTTP/S), its alternate assets are checked and
+   * (e.g. it is not served over HTTP/S) or is an SVG, its alternate assets are checked and
    * the first alternate asset that a browser can show is returned instead.
    * Such an asset is merged with the metadata of its parent asset (see
    * `Asset.fillAlternate`) and `getContext()` returns the parent asset.
    *
-   * @param {boolean} browserOnly - Return only images that can be shown in a browser natively (PNG/JPG/GIF/WEBP + HTTP/S).
+   * SVG images are sorted after raster images.
+   *
+   * @param {boolean} browserOnly - Return only images that can be shown in a browser natively (GIF/JPEG/PNG/WebP/AVIF/SVG + HTTP/S).
    * @param {string|null} prefer - If not `null` (default), prefers a role over the other. Either `thumbnail` or `overview`.
    * @param {boolean} includeGraphic - Also include assets with the role `graphic`.
    * @returns {Array.<STACReference>} Asset or Link
@@ -109,21 +118,27 @@ class STAC extends STACHypermedia {
         thumbnails.push(thumbnail);
       }
     }
+    const isSvg = (img) => img.isType(svgMediaType);
     if (browserOnly) {
       // Replace all images that can't be displayed in a browser with a
       // browser-displayable alternate asset (if available), remove them otherwise.
       // See https://github.com/radiantearth/stac-browser/issues/910
       thumbnails = thumbnails
         .map((img) => {
-          if (img.canBrowserDisplayImage()) {
+          if (img.canBrowserDisplayImage() && !isSvg(img)) {
             return img;
           } else if (img.isAsset) {
-            return img.getAlternates(true).find((alt) => alt.canBrowserDisplayImage()) || null;
+            const alternate = img.getAlternates(true).find((alt) => alt.canBrowserDisplayImage());
+            if (alternate) {
+              return alternate;
+            }
           }
-          return null;
+          return img.canBrowserDisplayImage() ? img : null;
         })
         .filter((img) => img !== null);
     }
+    // Sort SVG images after raster images (two filters for a stable order)
+    thumbnails = thumbnails.filter((img) => !isSvg(img)).concat(thumbnails.filter(isSvg));
     if (prefer && thumbnails.length > 1) {
       // Prefer one role over the other.
       // The two step approach with two filters ensures the same sort bevahiour across all browsers:

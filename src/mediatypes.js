@@ -18,7 +18,16 @@ export const stacMediaTypes = ['application/json', geojsonMediaType, 'text/json'
 export const schemaMediaType = 'application/schema+json';
 
 /**
- * All image media types that Web Browsers can show (GIF, JPEG, PNG, WebP).
+ * The SVG media type.
+ *
+ * @type {string}
+ */
+export const svgMediaType = 'image/svg+xml';
+
+/**
+ * All image media types that Web Browsers can show (GIF, JPEG, APNG, PNG, WebP, AVIF, SVG).
+ *
+ * SVG is included because browsers render it in `<img>` elements with scripts and external resources disabled.
  *
  * @type {Array.<string>}
  */
@@ -29,10 +38,10 @@ export const browserImageTypes = [
   'image/png',
   'image/webp',
   'image/avif',
+  svgMediaType,
   // To be considered in the future if needed.
   // see also https://developer.mozilla.org/en-US/docs/Web/Media/Guides/Formats/Image_types
   //'image/bmp',
-  //'image/svg+xml',
 ];
 
 /**

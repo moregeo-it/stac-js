@@ -77,7 +77,7 @@ class STACReference extends STACObject {
     } else if (
       typeof this.type === 'undefined' &&
       hasText(extension) &&
-      (extension === 'jpg' || browserImageTypes.includes('image/' + extension))
+      (extension === 'jpg' || extension === 'svg' || browserImageTypes.includes('image/' + extension))
     ) {
       return true;
     } else {

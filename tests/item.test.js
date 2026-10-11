@@ -200,6 +200,55 @@ describe('getThumbnails with alternate assets', () => {
   });
 });
 
+describe('getThumbnails with SVG', () => {
+  const makeItem = (assets) =>
+    new Item({
+      stac_version: '1.1.0',
+      type: 'Feature',
+      id: 'svg-thumbnail',
+      geometry: null,
+      properties: { datetime: '2024-01-01T00:00:00Z' },
+      links: [{ rel: 'self', href: 'https://example.com/item.json', type: 'application/geo+json' }],
+      assets,
+    });
+
+  test('sorts SVG after raster images', () => {
+    const item = makeItem({
+      svg: { href: 'https://example.com/a.svg', type: 'image/svg+xml', roles: ['thumbnail'] },
+      png: { href: 'https://example.com/c.png', type: 'image/png', roles: ['thumbnail'] },
+      jpg: { href: 'https://example.com/d.jpg', type: 'image/jpeg', roles: ['thumbnail'] },
+    });
+    expect(item.getThumbnails().map((img) => img.getKey())).toEqual(['png', 'jpg', 'svg']);
+    expect(item.getThumbnails(false).map((img) => img.getKey())).toEqual(['png', 'jpg', 'svg']);
+  });
+
+  test('prefers a raster alternate over an SVG asset', () => {
+    const item = makeItem({
+      thumbnail: {
+        href: 'https://example.com/thumbnail.svg',
+        type: 'image/svg+xml',
+        roles: ['thumbnail'],
+        alternate: {
+          png: { href: 'https://example.com/thumbnail.png', type: 'image/png' },
+        },
+      },
+    });
+    const thumbnails = item.getThumbnails(true);
+    expect(thumbnails.length).toBe(1);
+    expect(thumbnails[0].getAbsoluteUrl()).toBe('https://example.com/thumbnail.png');
+    expect(thumbnails[0].getContext()).toBe(item.getAsset('thumbnail'));
+    // Without browserOnly the SVG asset is returned as is
+    expect(item.getThumbnails(false)[0].getAbsoluteUrl()).toBe('https://example.com/thumbnail.svg');
+  });
+
+  test('keeps an SVG asset without a raster alternate', () => {
+    const item = makeItem({
+      thumbnail: { href: 'https://example.com/thumbnail.svg', type: 'image/svg+xml', roles: ['thumbnail'] },
+    });
+    expect(item.getThumbnails(true)[0].getAbsoluteUrl()).toBe('https://example.com/thumbnail.svg');
+  });
+});
+
 test('getAssets', () => {
   expect(item.getAssets()).toEqual(Object.values(item.assets));
 });
