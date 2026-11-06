@@ -79,6 +79,13 @@ export const zarrMediaTypes = [
 ].concat(wozMediaTypes);
 
 /**
+ * All Cloud Optimized Point Cloud (COPC) media types.
+ *
+ * @type {Array.<string>}
+ */
+export const copcMediaTypes = ['application/vnd.laszip+copc'];
+
+/**
  * All GeoTiff media types (including COG media types).
  *
  * @type {Array.<string>}

@@ -1,0 +1,42 @@
+{
+  "type": "Feature",
+  "stac_version": "1.1.0",
+  "stac_extensions": ["https://stac-extensions.github.io/pointcloud/v2.0.0/schema.json"],
+  "id": "autzen-classified",
+  "bbox": [-123.075535, 44.04971459, -123.0619527, 44.06277605],
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [-123.075535, 44.04971459],
+        [-123.0619527, 44.04971459],
+        [-123.0619527, 44.06277605],
+        [-123.075535, 44.06277605],
+        [-123.075535, 44.04971459]
+      ]
+    ]
+  },
+  "properties": {
+    "datetime": "2010-01-01T00:00:00Z",
+    "pc:count": 10653336,
+    "pc:type": "lidar"
+  },
+  "assets": {
+    "laz": {
+      "href": "https://example.com/autzen-classified.laz",
+      "type": "application/vnd.laszip",
+      "roles": ["data"]
+    },
+    "copc": {
+      "href": "https://example.com/autzen-classified.copc.laz",
+      "type": "application/vnd.laszip+copc",
+      "roles": ["data"]
+    },
+    "copc-s3": {
+      "href": "s3://example/autzen-classified.copc.laz",
+      "type": "application/vnd.laszip+copc",
+      "roles": ["data"]
+    }
+  },
+  "links": []
+}
