@@ -1,5 +1,6 @@
 import {
   cogMediaTypes,
+  copcMediaTypes,
   geotiffMediaTypes,
   isMediaType,
   svgMediaType,
@@ -150,9 +151,9 @@ class STAC extends STACHypermedia {
   }
 
   /**
-   * Determines the default GeoTIFF/GeoZARR asset for visualization.
+   * Determines the default GeoTIFF/GeoZARR/COPC asset for visualization.
    *
-   * @param {string} type The file type to look for, either `geotiff` or `geozarr`.
+   * @param {string} type The file type to look for, either `geotiff`, `geozarr` or `copc`.
    * @param {boolean} httpOnly Return only GeoTiffs that can be accessed via HTTP(S)
    * @param {boolean} optimizedOnly Return only optimized files (COG/WOZ)
    * @returns {Asset} Default asset to visualize or `null` if no suitable asset is found.
@@ -182,7 +183,7 @@ class STAC extends STACHypermedia {
    */
 
   /**
-   * Ranks the GeoTiff/GeoZarr assets for visualization purposes.
+   * Ranks the GeoTiff/GeoZarr/COPC assets for visualization purposes.
    *
    * The score factors can be found below:
    * - Roles/Keys (by default) - if multiple roles apply only the highest score is added:
@@ -192,7 +193,7 @@ class STAC extends STACHypermedia {
    *   - data => +1
    *   - none of the above => no change
    * - Other factors:
-   *   - media type is COG/WOZ: +2 (if optimizedOnly = false)
+   *   - media type is COG/WOZ: +2 (if optimizedOnly = false), COPC is always optimized
    *   - has RGB bands: +1
    *   - additionalCriteria: +/- a custom value
    *
@@ -202,21 +203,23 @@ class STAC extends STACHypermedia {
    * parent asset (see `Asset.fillAlternate`) and `getContext()` returns the
    * parent asset.
    *
-   * @param {string} type The file type to rank for, either `geotiff` or `geozarr`.
+   * @param {string} type The file type to rank for, either `geotiff`, `geozarr` or `copc`.
    * @param {boolean} httpOnly Return only GeoTiffs that can be accessed via HTTP(S)
    * @param {boolean} optimizedOnly Return only optimized files (COG/WOZ)
    * @param {Object.<string, number>} roleScores Roles (and keys) considered for the scoring. They key is the role name, the value is the score. Higher is better. Defaults to the roles and scores detailed above. An empty object disables role-based scoring.
    * @param {STAC~rankGeoFiles} additionalCriteria A function to customize the score by adding/subtracting.
-   * @returns {Array.<AssetScore>} GeoTiff/GeoZarr assets sorted by score in descending order.
+   * @returns {Array.<AssetScore>} GeoTiff/GeoZarr/COPC assets sorted by score in descending order.
    */
   rankGeoFiles(type, httpOnly = true, optimizedOnly = false, roleScores = null, additionalCriteria = null) {
     const mediaTypes = {
       geotiff: geotiffMediaTypes,
       geozarr: zarrMediaTypes,
+      copc: copcMediaTypes,
     };
     const optimizedTypes = {
       geotiff: cogMediaTypes,
       geozarr: wozMediaTypes,
+      copc: copcMediaTypes,
     };
     if (!(type in mediaTypes)) {
       return [];

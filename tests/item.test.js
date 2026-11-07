@@ -29,6 +29,9 @@ let item2Old = create(json2Old, true, true);
 let jsonZarr = loadJson('./tests/examples/item-s2-eopf-zarr.json');
 let itemZarr = new Item(jsonZarr);
 
+let jsonCopc = loadJson('./tests/examples/item-copc.json');
+let itemCopc = new Item(jsonCopc);
+
 describe('Migration', () => {
   test('stac_version', () => {
     expect(item2Old.stac_version).toBe(item2.stac_version);
@@ -327,6 +330,17 @@ describe('rankGeoFiles', () => {
     expect(ranks.map((r) => r.score)).toEqual([3, 2]);
   });
 
+  test('default (copc)', () => {
+    let ranks = itemCopc.rankGeoFiles('copc');
+    expect(ranks.map((r) => r.asset.getKey())).toEqual(['copc']);
+    expect(ranks.map((r) => r.score)).toEqual([3]);
+  });
+
+  test('not httpOnly (copc)', () => {
+    let ranks = itemCopc.rankGeoFiles('copc', false);
+    expect(ranks.map((r) => r.asset.getKey())).toEqual(['copc', 'copc-s3']);
+  });
+
   test('optimizedOnly (zarr)', () => {
     let ranks = itemZarr.rankGeoFiles('geozarr', true, true);
     expect(ranks.length).toBe(1);
@@ -374,6 +388,13 @@ describe('rankGeoFiles', () => {
     expect(asset.getKey()).toEqual('visual');
     expect(asset.href).toEqual('./20201211_223832_CS2.tif');
     expect(asset.getAbsoluteUrl()).toEqual('https://example.com/20201211_223832_CS2/20201211_223832_CS2.tif');
+  });
+
+  test('getDefaultGeoFile (copc)', () => {
+    let asset = itemCopc.getDefaultGeoFile('copc');
+    expect(asset).not.toBeNull();
+    expect(asset.getKey()).toEqual('copc');
+    expect(item.getDefaultGeoFile('copc')).toBeUndefined();
   });
 
   test('getDefaultGeoFile (zarr)', () => {
