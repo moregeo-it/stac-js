@@ -154,6 +154,42 @@ class STACHypermedia extends STACObject {
   getParentLink() {
     return this.getStacLinkWithRel('parent');
   }
+
+  /**
+   * Returns all related links.
+   *
+   * For catalogs and collections in a poly-hierarchy (e.g. STAC API - Multi-Tenant
+   * Catalogs extension), these link to the alternative parent catalogs.
+   *
+   * @returns {Array.<Link>} The related links
+   */
+  getRelatedLinks() {
+    return this.getStacLinksWithRel('related');
+  }
+
+  /**
+   * Returns the canonical link, if present.
+   *
+   * For resources accessed via a scoped endpoint (e.g. STAC API - Multi-Tenant
+   * Catalogs extension), this points to the primary, authoritative URL.
+   *
+   * @returns {Link|null} The canonical link
+   */
+  getCanonicalLink() {
+    return this.getStacLinkWithRel('canonical');
+  }
+
+  /**
+   * Returns all duplicate links.
+   *
+   * For resources in a poly-hierarchy (e.g. STAC API - Multi-Tenant Catalogs
+   * extension), these point to other paths where the identical resource can be accessed.
+   *
+   * @returns {Array.<Link>} The duplicate links
+   */
+  getDuplicateLinks() {
+    return this.getStacLinksWithRel('duplicate');
+  }
 }
 
 export default STACHypermedia;

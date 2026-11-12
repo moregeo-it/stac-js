@@ -163,6 +163,22 @@
       "title": "Sub-Catalogs"
     },
     {
+      "rel": "related",
+      "href": "https://example.com/catalogs/esa-optical",
+      "type": "application/json",
+      "title": "Alternative Parent"
+    },
+    {
+      "rel": "canonical",
+      "href": "https://example.com/",
+      "type": "application/json"
+    },
+    {
+      "rel": "duplicate",
+      "href": "https://example.com/catalogs/esa-optical",
+      "type": "application/json"
+    },
+    {
       "rel": "root",
       "href": "https://example.com",
       "type": "application/json"
