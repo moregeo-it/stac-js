@@ -33,18 +33,24 @@ export default function create(data, migrate = true, updateVersionNumber = false
   if (!data.type || (!data.stac_version && (data.type === 'Catalog' || data.type === 'Collection'))) {
     if (ChildrenCollection.isResponse(data)) {
       if (migrate) {
-        data.children = data.children.map((child) =>
-          isObject(child) ? Migrate.stac(child, updateVersionNumber) : child,
-        );
+        data = {
+          ...data,
+          children: data.children.map((child) =>
+            child instanceof STAC || !isObject(child) ? child : Migrate.stac(child, updateVersionNumber),
+          ),
+        };
       }
       return new ChildrenCollection(data);
     } else if (CollectionCollection.isResponse(data)) {
       return new CollectionCollection(migrate ? Migrate.collectionCollection(data, updateVersionNumber) : data);
     } else if (CatalogCollection.isResponse(data)) {
       if (migrate) {
-        data.catalogs = data.catalogs.map((catalog) =>
-          isObject(catalog) ? Migrate.stac(catalog, updateVersionNumber) : catalog,
-        );
+        data = {
+          ...data,
+          catalogs: data.catalogs.map((catalog) =>
+            catalog instanceof STAC || !isObject(catalog) ? catalog : Migrate.stac(catalog, updateVersionNumber),
+          ),
+        };
       }
       return new CatalogCollection(data);
     }

@@ -55,7 +55,10 @@ test('catalogs are typed as Catalog and Collection', () => {
 });
 
 test('malformed entries are skipped', () => {
-  let cc2 = new CatalogCollection({ catalogs: [catalog, null, 'invalid', 42], links: [] });
+  let cc2 = new CatalogCollection({
+    catalogs: [catalog, null, 'invalid', 42, { type: 'Feature' }, { type: 'FeatureCollection' }],
+    links: [],
+  });
   expect(cc2.catalogs.length).toBe(1);
   expect(cc2.catalogs[0]).toBeInstanceOf(Catalog);
 });

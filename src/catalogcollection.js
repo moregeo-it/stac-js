@@ -34,7 +34,12 @@ class CatalogCollection extends APICollection {
       catalogs: (catalogs) =>
         Array.isArray(catalogs)
           ? catalogs
-              .filter((catalog) => isObject(catalog))
+              .filter(
+                (catalog) =>
+                  catalog instanceof STAC ||
+                  (isObject(catalog) &&
+                    (catalog.type === undefined || catalog.type === 'Catalog' || catalog.type === 'Collection')),
+              )
               .map((catalog) => {
                 if (catalog instanceof STAC) {
                   return catalog;
@@ -79,7 +84,7 @@ class CatalogCollection extends APICollection {
    * Catalogs without a geometry are omitted.
    *
    * @param {boolean|FixOptions} fixAntimeridian Deprecated, has no effect. Bounding boxes are always split at the antimeridian if needed.
-   * @returns {Object|null} GeoJSON object or `null`
+   * @returns {Object} GeoJSON object
    */
   toGeoJSON(fixAntimeridian = false) {
     let features = this.getAll().map((catalog) => catalog.toGeoJSON(fixAntimeridian)).filter((geojson) => geojson !== null);

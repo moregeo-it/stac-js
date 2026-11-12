@@ -53,6 +53,15 @@ test('children are typed as Catalog and Collection', () => {
   expect(cc.children[1]).toBeInstanceOf(Collection);
 });
 
+test('malformed entries are skipped', () => {
+  let cc2 = new ChildrenCollection({
+    children: [catalog, null, 'invalid', 42, { type: 'Feature' }, { type: 'FeatureCollection' }],
+    links: [],
+  });
+  expect(cc2.children.length).toBe(1);
+  expect(cc2.children[0]).toBeInstanceOf(Catalog);
+});
+
 test('toGeoJSON omits children without geometry', () => {
   let geojson = cc.toGeoJSON();
   expect(geojson).not.toBeNull();

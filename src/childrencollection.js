@@ -34,7 +34,12 @@ class ChildrenCollection extends APICollection {
       children: (children) =>
         Array.isArray(children)
           ? children
-              .filter((child) => isObject(child))
+              .filter(
+                (child) =>
+                  child instanceof STAC ||
+                  (isObject(child) &&
+                    (child.type === undefined || child.type === 'Catalog' || child.type === 'Collection')),
+              )
               .map((child) => {
                 if (child instanceof STAC) {
                   return child;
@@ -79,7 +84,7 @@ class ChildrenCollection extends APICollection {
    * Children without a geometry (e.g. Catalogs) are omitted.
    *
    * @param {boolean|FixOptions} fixAntimeridian Deprecated, has no effect. Bounding boxes are always split at the antimeridian if needed.
-   * @returns {Object|null} GeoJSON object or `null`
+   * @returns {Object} GeoJSON object
    */
   toGeoJSON(fixAntimeridian = false) {
     let features = this.getAll().map((child) => child.toGeoJSON(fixAntimeridian)).filter((geojson) => geojson !== null);
