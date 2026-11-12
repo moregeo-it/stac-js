@@ -1,7 +1,12 @@
 /**
  * Hierarchical relation types used by STAC.
+ *
+ * `catalogs` is part of the Multi-Tenant Catalogs extension and links to the recursive
+ * (sub-)catalog registry of a catalog, which can be nested to arbitrary depth.
+ * `children` is part of the API Children extension and links to the child catalogs and
+ * collections of a catalog.
  */
-export const hierarchical = ['child', 'collection', 'item', 'parent', 'root', 'self'];
+export const hierarchical = ['catalogs', 'child', 'children', 'collection', 'item', 'parent', 'root', 'self'];
 
 /**
  * All relation types used by STAC for pagination.

@@ -9,6 +9,7 @@ toc:
       ![Class diagram for stac-js](classes.png)
   - Asset
   - Catalog
+  - CatalogCollection
   - CatalogLike
   - ChildrenCollection
   - Collection

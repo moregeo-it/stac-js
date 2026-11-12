@@ -56,6 +56,37 @@ test('getApiChildrenLink', () => {
   expect(link.type).toBe('application/json');
 });
 
+test('getApiCatalogsLink', () => {
+  let link = c.getApiCatalogsLink();
+  expect(link).not.toBeNull();
+  expect(link.href).toBe('https://example.com/catalogs');
+  expect(link.rel).toBe('catalogs');
+  expect(link.type).toBe('application/json');
+});
+
+test('getRelatedLinks', () => {
+  let links = c.getRelatedLinks();
+  expect(Array.isArray(links)).toBeTruthy();
+  expect(links.length).toBe(1);
+  expect(links[0].href).toBe('https://example.com/catalogs/esa-optical');
+  expect(links[0].rel).toBe('related');
+});
+
+test('getCanonicalLink', () => {
+  let link = c.getCanonicalLink();
+  expect(link).not.toBeNull();
+  expect(link.href).toBe('https://example.com/');
+  expect(link.rel).toBe('canonical');
+});
+
+test('getDuplicateLinks', () => {
+  let links = c.getDuplicateLinks();
+  expect(Array.isArray(links)).toBeTruthy();
+  expect(links.length).toBe(1);
+  expect(links[0].href).toBe('https://example.com/catalogs/esa-optical');
+  expect(links[0].rel).toBe('duplicate');
+});
+
 test('getChildLinks', () => {
   let childs = c.getChildLinks();
   expect(Array.isArray(childs)).toBeTruthy();
