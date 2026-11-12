@@ -56,6 +56,14 @@ test('getApiChildrenLink', () => {
   expect(link.type).toBe('application/json');
 });
 
+test('getApiCatalogsLink', () => {
+  let link = c.getApiCatalogsLink();
+  expect(link).not.toBeNull();
+  expect(link.href).toBe('https://example.com/catalogs');
+  expect(link.rel).toBe('catalogs');
+  expect(link.type).toBe('application/json');
+});
+
 test('getChildLinks', () => {
   let childs = c.getChildLinks();
   expect(Array.isArray(childs)).toBeTruthy();

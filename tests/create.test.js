@@ -1,5 +1,6 @@
 import create from '../src/index';
 import Catalog from '../src/catalog';
+import CatalogCollection from '../src/catalogcollection';
 import ChildrenCollection from '../src/childrencollection';
 import Collection from '../src/collection';
 import CollectionCollection from '../src/collectioncollection';
@@ -65,6 +66,15 @@ describe('create', () => {
     };
     let result = create(data, false);
     expect(result).toBeInstanceOf(ChildrenCollection);
+  });
+
+  test('returns CatalogCollection for object without type but with catalogs array', () => {
+    let data = {
+      catalogs: [catalogJson],
+      links: [],
+    };
+    let result = create(data, false);
+    expect(result).toBeInstanceOf(CatalogCollection);
   });
 
   test('returns Catalog for Catalog type', () => {
@@ -160,6 +170,21 @@ describe('create with list responses and edge cases', () => {
       ChildrenCollection,
     ],
     [
+      'catalogs without type',
+      () => ({ catalogs: [clone(catalogJson)], links: [] }),
+      CatalogCollection,
+    ],
+    [
+      'catalogs without type, with stac_version',
+      () => ({ stac_version: '1.0.0', catalogs: [clone(catalogJson)], links: [] }),
+      CatalogCollection,
+    ],
+    [
+      'OGC API - Records catalogs response',
+      () => ({ type: 'Catalog', id: 'records', links: [], catalogs: [clone(catalogJson)] }),
+      CatalogCollection,
+    ],
+    [
       'OGC API - Records collections response',
       () => ({ type: 'Collection', id: 'records', links: [], collections: [clone(collectionJson)] }),
       CollectionCollection,
@@ -170,6 +195,7 @@ describe('create with list responses and edge cases', () => {
       ChildrenCollection,
     ],
     ['Catalog with stac_version and children', () => ({ ...clone(catalogJson), children: [] }), Catalog],
+    ['Catalog with stac_version and catalogs', () => ({ ...clone(catalogJson), catalogs: [] }), Catalog],
     ['Collection with stac_version and collections', () => ({ ...clone(collectionJson), collections: [] }), Collection],
     ['Feature without stac_version and children', () => ({ ...withoutVersion(clone(itemJson)), children: [] }), Item],
     [
@@ -206,6 +232,19 @@ describe('create with list responses and edge cases', () => {
     expect(create(data(), true, true).children.map((child) => child.stac_version)).toEqual(['1.1.0', '1.1.0']);
     // Without migration, the collection lacks a type and is treated as a catalog
     expect(create(data(), false).children[1]).toBeInstanceOf(Catalog);
+  });
+
+  test('migrates the catalogs of a CatalogCollection', () => {
+    let data = () => ({ catalogs: [catalog060(), collection060(), null], links: [] });
+    let result = create(data());
+    expect(result.catalogs.length).toBe(2);
+    expect(result.catalogs[0]).toBeInstanceOf(Catalog);
+    expect(result.catalogs[1]).toBeInstanceOf(Collection);
+    expect(result.catalogs[1].extent.spatial.bbox).toEqual([[-180, -90, 180, 90]]);
+    expect(result.catalogs[1].stac_version).toBe('0.6.0');
+    expect(create(data(), true, true).catalogs.map((catalog) => catalog.stac_version)).toEqual(['1.1.0', '1.1.0']);
+    // Without migration, the collection lacks a type and is treated as a catalog
+    expect(create(data(), false).catalogs[1]).toBeInstanceOf(Catalog);
   });
 
   test('does not add Collection fields to an OGC API - Records collections response', () => {

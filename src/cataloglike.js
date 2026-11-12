@@ -197,6 +197,15 @@ class CatalogLike extends STAC {
   }
 
   /**
+   * Returns the link for the catalogs endpoint (STAC API - Multi-Tenant Catalogs extension), if present.
+   *
+   * @returns {Link|null} The API catalogs link
+   */
+  getApiCatalogsLink() {
+    return this.getStacLinkWithRel('catalogs');
+  }
+
+  /**
    * Returns all child links.
    *
    * @returns {Array.<Link>} The child links

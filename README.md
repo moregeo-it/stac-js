@@ -27,7 +27,7 @@ const stac = {
 const obj = create(stac); // Migrates data to the latest version
 ```
 
-Directly instantiate `Asset`, `Catalog`, `Collection`, `CollectionCollection`, `ChildrenCollection`, `Item` or `ItemCollection` through the class constructors:
+Directly instantiate `Asset`, `Catalog`, `CatalogCollection`, `Collection`, `CollectionCollection`, `ChildrenCollection`, `Item` or `ItemCollection` through the class constructors:
 
 ```js
 import { Collection } from 'stac-js'; // or Catalog or Item
@@ -92,6 +92,7 @@ classDiagram
     ItemCollection --|> APICollection
     CollectionCollection --|> APICollection
     ChildrenCollection --|> APICollection
+    CatalogCollection --|> APICollection
 
     classDef interface fill:#fff3bf,stroke:#d9a406,color:#000;
     classDef concrete fill:#cfe2ff,stroke:#3b6fb5,color:#000;
@@ -111,6 +112,7 @@ classDiagram
     class ItemCollection:::concrete
     class CollectionCollection:::concrete
     class ChildrenCollection:::concrete
+    class CatalogCollection:::concrete
 ```
 
 > [!NOTE]

@@ -3,6 +3,7 @@ import APICollection from './apicollection.js';
 import Asset from './asset.js';
 import Band from './band.js';
 import Catalog from './catalog.js';
+import CatalogCollection from './catalogcollection.js';
 import CatalogLike from './cataloglike.js';
 import ChildrenCollection from './childrencollection.js';
 import Collection from './collection.js';
@@ -25,7 +26,7 @@ import { isObject } from './utils.js';
  * @param {Object} data The STAC object
  * @param {boolean} migrate `true` to migrate to the latest version, `false` otherwise
  * @param {boolean} updateVersionNumber `true` to update the version number (to the latest version), `false` otherwise. Only applies if `migrate` is set to `true`.
- * @returns {Catalog|Collection|CollectionCollection|ChildrenCollection|Item|ItemCollection} The created object instance.
+ * @returns {Catalog|CatalogCollection|Collection|CollectionCollection|ChildrenCollection|Item|ItemCollection} The created object instance.
  */
 export default function create(data, migrate = true, updateVersionNumber = false) {
   // OGC API - Records responses are also catalogs (type, but no stac_version) and stac-migrate would add a type
@@ -39,6 +40,13 @@ export default function create(data, migrate = true, updateVersionNumber = false
       return new ChildrenCollection(data);
     } else if (CollectionCollection.isResponse(data)) {
       return new CollectionCollection(migrate ? Migrate.collectionCollection(data, updateVersionNumber) : data);
+    } else if (CatalogCollection.isResponse(data)) {
+      if (migrate) {
+        data.catalogs = data.catalogs.map((catalog) =>
+          isObject(catalog) ? Migrate.stac(catalog, updateVersionNumber) : catalog,
+        );
+      }
+      return new CatalogCollection(data);
     }
   }
   if (migrate) {
@@ -63,6 +71,7 @@ export {
   Asset,
   Band,
   Catalog,
+  CatalogCollection,
   CatalogLike,
   ChildrenCollection,
   Collection,
