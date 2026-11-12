@@ -2,6 +2,7 @@ import Collection from './collection.js';
 import { unionDateTime } from './datetime.js';
 import { unionBoundingBox } from './geo.js';
 import { isObject } from './utils.js';
+import { resolveSelfUrl } from './http.js';
 import APICollection from './apicollection.js';
 import { queryables, sortables } from './relationtypes.js';
 
@@ -33,7 +34,11 @@ class CollectionCollection extends APICollection {
         Array.isArray(collections)
           ? collections
               .filter((collection) => isObject(collection))
-              .map((collection) => (collection instanceof Collection ? collection : new Collection(collection)))
+              .map((collection) =>
+                collection instanceof Collection
+                  ? collection
+                  : new Collection(collection, resolveSelfUrl(collection, absoluteUrl)),
+              )
           : [],
     };
     super(data, absoluteUrl, keyMap);

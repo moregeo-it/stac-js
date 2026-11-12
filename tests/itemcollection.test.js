@@ -18,6 +18,16 @@ test('Basics', () => {
   expect(ic.getAbsoluteUrl()).toBe(null);
 });
 
+test('Relative self links of Items are resolved against the ItemCollection URL', () => {
+  const features = [
+    { type: 'Feature', id: 'a', geometry: null, properties: {}, links: [{ rel: 'self', href: './items/a' }] },
+    { type: 'Feature', id: 'b', geometry: null, properties: {}, links: [] },
+  ];
+  const ic2 = new ItemCollection({ type: 'FeatureCollection', features }, 'https://stac.example/collections/c1/');
+  expect(ic2.features[0].getAbsoluteUrl()).toBe('https://stac.example/collections/c1/items/a');
+  expect(ic2.features[1].getAbsoluteUrl()).toBeNull();
+});
+
 test('is...', () => {
   expect(ic.isItem).toBeFalsy();
   expect(ic.isCatalog).toBeFalsy();

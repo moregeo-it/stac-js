@@ -1,6 +1,7 @@
 import { unionDateTime } from './datetime.js';
 import { applyAntimeridianFix, unionBoundingBox } from './geo.js';
 import { isObject } from './utils.js';
+import { resolveSelfUrl } from './http.js';
 import Item from './item.js';
 import APICollection from './apicollection.js';
 
@@ -33,7 +34,9 @@ class ItemCollection extends APICollection {
         Array.isArray(features)
           ? features
               .filter((feature) => isObject(feature))
-              .map((feature) => (feature instanceof Item ? feature : new Item(feature)))
+              .map((feature) =>
+                feature instanceof Item ? feature : new Item(feature, resolveSelfUrl(feature, absoluteUrl)),
+              )
           : [],
     };
     super(data, absoluteUrl, keyMap);
